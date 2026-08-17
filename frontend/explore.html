@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Sustainable Fuels — EcoFuel Connect AI</title>
+  <meta name="description" content="Browse biogas, Bio-CNG, biofuel and biomass listings near you. Filter by city, price and use case.">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/translations.js"></script>
+  <script src="js/i18n.js" defer></script>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="/images/logo.png" alt="EcoFuel Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover">
+    <span class="brand-text">EcoFuel <span>Connect</span></span>
+  </a>
+  <ul class="navbar-nav">
+    <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+    <li><a href="explore.html" class="active" data-i18n="nav_explore">Explore Fuels</a></li>
+    <li><a href="ai-features.html" data-i18n="nav_ai">AI Features</a></li>
+    <li><a href="analytics.html" data-i18n="nav_analytics">Analytics</a></li>
+    <li><a href="delivery-agent.html">🚴 Delivery</a></li>
+    <li id="nav-seller" style="display:none"><a href="seller-dashboard.html">Seller</a></li>
+    <li id="nav-admin" style="display:none"><a href="admin.html">Admin</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <div class="lang-selector">
+      <span class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</span>
+      <span class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">HI</span>
+      <span class="lang-btn" data-lang="te" onclick="setLanguage('te')">TE</span>
+      <span class="lang-btn" data-lang="ta" onclick="setLanguage('ta')">TA</span>
+    </div>
+    <a id="nav-login" href="login.html" class="btn btn-outline btn-sm" data-i18n="nav_login">Login</a>
+    <div id="nav-user" style="display:none;align-items:center;gap:10px">
+      <a href="user-dashboard.html" class="btn btn-ghost btn-sm">My Account <span id="nav-username"></span></a>
+      <button class="btn btn-sm btn-danger" onclick="logout()" data-i18n="nav_logout">Logout</button>
+    </div>
+    <button class="mobile-menu-btn" onclick="document.getElementById('mm').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+  </div>
+</nav>
+<div id="mm" class="navbar-mobile">
+  <a href="index.html">Home</a>
+  <a href="explore.html">Explore Fuels</a>
+  <a href="ai-features.html">AI Features</a>
+  <a href="analytics.html">Analytics</a>
+  <a href="login.html">Login</a>
+</div>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="container">
+    <div class="hero-badge" style="display:inline-flex;margin-bottom:12px">Browse Marketplace</div>
+    <h1 class="section-title">Explore <span class="gradient-text">Sustainable Fuels</span></h1>
+    <p class="section-sub">Find biogas, Bio-CNG, biofuel and biomass listings near you, filtered by price, city and usage.</p>
+    <!-- Search Bar -->
+    <div class="hero-search mt-24" style="max-width:560px">
+      <span style="font-size:1rem;color:var(--clr-text-3)">&#128269;</span>
+      <input type="text" id="search-input" placeholder="Search fuel name, description..." data-i18n="label_search" style="min-width:0">
+      <button class="btn btn-primary btn-sm" onclick="applyFilters()">Search</button>
+    </div>
+  </div>
+</div>
+
+<div class="container section-sm">
+  <div class="explore-layout">
+
+    <!-- Filter Sidebar -->
+    <aside class="filter-panel">
+      <div class="filter-title">Filters</div>
+
+      <div class="filter-group">
+        <label data-i18n="label_fuel_type">Fuel Type</label>
+        <button class="fuel-filter-btn active" id="f-all" onclick="setFuelFilter('')">All Types</button>
+        <button class="fuel-filter-btn" id="f-biogas" onclick="setFuelFilter('biogas')">
+          <img src="/images/biogas.png" style="width:18px;height:18px;object-fit:contain"> Biogas
+        </button>
+        <button class="fuel-filter-btn" id="f-bio-cng" onclick="setFuelFilter('bio-cng')">
+          <img src="/images/bio-cng.png" style="width:18px;height:18px;object-fit:contain"> Bio-CNG
+        </button>
+        <button class="fuel-filter-btn" id="f-biofuel" onclick="setFuelFilter('biofuel')">
+          <img src="/images/biofuel.png" style="width:18px;height:18px;object-fit:contain"> Biofuel
+        </button>
+        <button class="fuel-filter-btn" id="f-biomass" onclick="setFuelFilter('biomass')">
+          <img src="/images/biomass.png" style="width:18px;height:18px;object-fit:contain"> Biomass
+        </button>
+      </div>
+
+      <div class="filter-group">
+        <label data-i18n="label_city">City</label>
+        <select id="filter-city" class="form-control" onchange="applyFilters()">
+          <option value="">All Cities</option>
+          <option>Delhi</option><option>Mumbai</option><option>Bangalore</option>
+          <option>Chennai</option><option>Pune</option><option>Hyderabad</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Use Case</label>
+        <select id="filter-usecase" class="form-control" onchange="applyFilters()">
+          <option value="">All Uses</option>
+          <option value="home">Home</option>
+          <option value="vehicle">Vehicle</option>
+          <option value="industrial">Industrial</option>
+          <option value="agricultural">Agricultural</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Max Price (Rs./unit)</label>
+        <input type="number" id="filter-price" class="form-control" placeholder="e.g. 100" onchange="applyFilters()">
+      </div>
+
+      <div class="filter-group">
+        <label>Sort By</label>
+        <select id="filter-sort" class="form-control" onchange="applyFilters()">
+          <option value="views">Most Popular</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+          <option value="rating">Best Rated</option>
+        </select>
+      </div>
+
+      <button class="btn btn-ghost btn-sm w-full" onclick="clearFilters()">Clear All Filters</button>
+    </aside>
+
+    <!-- Product Grid -->
+    <div>
+      <div class="results-header">
+        <span class="results-count" id="results-count">Loading...</span>
+        <span class="tag" id="ai-badge">AI-ranked</span>
+      </div>
+      <div id="products-grid" class="grid-auto">
+        <div class="flex-center" style="grid-column:1/-1;padding:60px"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="js/api.js"></script>
+<script>
+  let currentFuel = '';
+
+  // Read URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('fuel')) {
+    currentFuel = urlParams.get('fuel');
+  }
+  if (urlParams.get('search')) {
+    document.getElementById('search-input').value = urlParams.get('search');
+  }
+  if (urlParams.get('city')) {
+    document.getElementById('filter-city').value = urlParams.get('city');
+  }
+
+  function setFuelFilter(type) {
+    currentFuel = type;
+    ['all','biogas','bio-cng','biofuel','biomass'].forEach(f =>
+      document.getElementById(`f-${f}`).classList.toggle('active', f === (type || 'all'))
+    );
+    applyFilters();
+  }
+
+  function clearFilters() {
+    currentFuel = '';
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-city').value = '';
+    document.getElementById('filter-usecase').value = '';
+    document.getElementById('filter-price').value = '';
+    document.getElementById('filter-sort').value = 'views';
+    ['all','biogas','bio-cng','biofuel','biomass'].forEach(f =>
+      document.getElementById(`f-${f}`).classList.toggle('active', f === 'all')
+    );
+    applyFilters();
+  }
+
+  async function applyFilters() {
+    const params = {};
+    if (currentFuel) params.fuel_type = currentFuel;
+    const search = document.getElementById('search-input').value;
+    if (search) params.search = search;
+    const city = document.getElementById('filter-city').value;
+    if (city) params.city = city;
+    const useCase = document.getElementById('filter-usecase').value;
+    if (useCase) params.use_case = useCase;
+    const maxPrice = document.getElementById('filter-price').value;
+    if (maxPrice) params.max_price = maxPrice;
+    const sort = document.getElementById('filter-sort').value;
+    if (sort) params.sort = sort;
+
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = '<div class="flex-center" style="grid-column:1/-1;padding:60px"><div class="spinner"></div></div>';
+
+    try {
+      const products = await api.getProducts(params);
+      document.getElementById('results-count').textContent = `${products.length} listing${products.length !== 1 ? 's' : ''} found`;
+      if (products.length === 0) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">&#128269;</div><h3>No listings found</h3><p>Try changing your filters</p></div>';
+        return;
+      }
+      grid.innerHTML = products.map(p => renderProductCard(p)).join('');
+    } catch (e) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">&#9888;</div><h3>${e.message}</h3><p>Make sure the backend server is running on port 5000</p></div>`;
+    }
+  }
+
+  // Init
+  if (currentFuel) {
+    document.getElementById(`f-${currentFuel}`)?.classList.add('active');
+    document.getElementById('f-all')?.classList.remove('active');
+  }
+  document.getElementById('search-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') applyFilters();
+  });
+  applyFilters();
+</script>
+</body>
+</html>

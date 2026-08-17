@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Features &ndash; EcoFuel Connect AI</title>
+  <meta name="description" content="Explore EcoFuel Connect AI's 18 AI-powered features: carbon calculator, waste-to-energy estimator, cost comparison, demand forecast, and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/translations.js"></script>
+  <script src="js/i18n.js" defer></script>
+  <style>
+    /* ── AI Features Page Specific ── */
+    .ai-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #064e3b 50%, #0f172a 100%);
+      color: #fff;
+      padding: 100px 0 64px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .ai-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,0.2) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .ai-hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.5);
+      border-radius: 999px; padding: 6px 18px;
+      font-size: 0.78rem; font-weight: 700; color: #6ee7b7;
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 20px;
+    }
+    .ai-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 16px; }
+    .ai-hero p  { font-size: 1.1rem; color: rgba(255,255,255,0.7); max-width: 620px; margin: 0 auto 40px; }
+    .ai-badges  { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .ai-badge   { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 999px; padding: 6px 16px; font-size: 0.82rem; color: #a7f3d0; }
+
+    /* ── Feature Grid ── */
+    .feature-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: #fff; border: 1.5px solid var(--clr-border);
+      border-radius: var(--radius-lg); padding: 24px 20px;
+      transition: var(--transition); cursor: default;
+      position: relative;
+    }
+    .feature-card:hover { border-color: var(--clr-primary); box-shadow: var(--shadow-green); transform: translateY(-4px); }
+    .feature-icon-box {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px; flex-shrink: 0;
+    }
+    .fi-green  { background: #dcfce7; }
+    .fi-blue   { background: #dbeafe; }
+    .fi-orange { background: #ffedd5; }
+    .fi-purple { background: #ede9fe; }
+    .fi-teal   { background: #ccfbf1; }
+    .fi-red    { background: #fee2e2; }
+    .fi-yellow { background: #fef9c3; }
+    .feature-num {
+      position: absolute; top: 14px; right: 16px;
+      font-size: 0.72rem; font-weight: 700; color: var(--clr-text-3); letter-spacing: 0.04em;
+    }
+    .feature-title { font-weight: 700; font-size: 0.97rem; margin-bottom: 6px; color: var(--clr-text); }
+    .feature-desc  { font-size: 0.82rem; color: var(--clr-text-2); line-height: 1.6; }
+
+    /* ── Interactive Tool Cards ── */
+    .tool-section  { background: #f8fffe; border-top: 1px solid var(--clr-border); border-bottom: 1px solid var(--clr-border); }
+    .tool-card {
+      background: #fff; border: 1.5px solid var(--clr-border);
+      border-radius: var(--radius-xl); padding: 32px;
+      box-shadow: var(--shadow-xs); margin-bottom: 32px;
+    }
+    .tool-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--clr-border);
+    }
+    .tool-icon-box {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: #dcfce7; display: flex; align-items: center; justify-content: center;
+    }
+    .tool-title    { font-family: var(--font-head); font-size: 1.2rem; font-weight: 800; }
+    .tool-subtitle { font-size: 0.85rem; color: var(--clr-text-2); margin-top: 2px; }
+
+    .form-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--clr-text-2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-group select, .form-group input {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--clr-border); border-radius: var(--radius);
+      font-size: 0.92rem; color: var(--clr-text); background: #fff;
+      transition: border-color 0.2s;
+    }
+    .form-group select:focus, .form-group input:focus { outline: none; border-color: var(--clr-primary); }
+    .calc-btn {
+      background: var(--grad-primary); color: #fff; border: none;
+      border-radius: var(--radius); padding: 11px 28px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      transition: var(--transition); display: inline-flex; align-items: center; gap: 8px;
+    }
+    .calc-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ── Result Cards ── */
+    .result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-top: 20px; }
+    .result-card {
+      background: #f0fdf4; border: 1.5px solid #86efac;
+      border-radius: var(--radius-lg); padding: 18px 16px; text-align: center;
+    }
+    .result-val  { font-family: var(--font-head); font-size: 1.6rem; font-weight: 800; color: var(--clr-primary); }
+    .result-label{ font-size: 0.75rem; color: var(--clr-text-2); margin-top: 4px; font-weight: 600; }
+    .result-insight {
+      background: #f0fdf4; border-left: 4px solid var(--clr-primary);
+      border-radius: var(--radius); padding: 14px 18px; margin-top: 16px;
+      font-size: 0.9rem; color: #166534; font-weight: 600;
+    }
+
+    /* ── Comparison Table ── */
+    .cmp-table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+    .cmp-table th { background: #f0fdf4; color: #166534; font-size: 0.8rem; font-weight: 700; padding: 10px 14px; text-align: left; border-bottom: 2px solid #bbf7d0; }
+    .cmp-table td { padding: 10px 14px; border-bottom: 1px solid var(--clr-border); font-size: 0.88rem; }
+    .cmp-table tr.fossil td { color: var(--clr-text-2); background: #fafafa; }
+    .cmp-table tr.eco   td { color: #166534; font-weight: 600; }
+    .cmp-table tr:hover td { background: #f0fdf4; }
+    .savings-pill { background: #dcfce7; color: #166534; border-radius: 999px; padding: 2px 10px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+    .loss-pill    { background: #fee2e2; color: #dc2626; border-radius: 999px; padding: 2px 10px; font-size: 0.78rem; font-weight: 700; }
+
+    /* ── Demand Forecast Bars ── */
+    .forecast-bar-wrap { margin-top: 18px; }
+    .forecast-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .forecast-label { min-width: 100px; font-size: 0.82rem; font-weight: 600; color: var(--clr-text); }
+    .forecast-bar-track { flex: 1; background: var(--clr-bg); border-radius: 999px; height: 14px; overflow: hidden; }
+    .forecast-bar-fill  { height: 100%; background: var(--grad-primary); border-radius: 999px; transition: width 0.8s ease; }
+    .forecast-pct { min-width: 48px; text-align: right; font-size: 0.8rem; color: var(--clr-primary); font-weight: 700; }
+
+    /* Responsive */
+    @media(max-width:768px){
+      .ai-hero { padding: 80px 0 48px; }
+      .tool-card { padding: 20px 16px; }
+      .form-row { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width:480px){
+      .feature-overview { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="/images/logo.png" alt="EcoFuel Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover">
+    <span class="brand-text">EcoFuel <span>Connect</span></span>
+  </a>
+  <ul class="navbar-nav">
+    <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+    <li><a href="explore.html" data-i18n="nav_explore">Explore Fuels</a></li>
+    <li><a href="ai-features.html" class="active" data-i18n="nav_ai">AI Features</a></li>
+    <li><a href="analytics.html" data-i18n="nav_analytics">Analytics</a></li>
+    <li><a href="admin.html" data-i18n="nav_admin">Admin</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <div class="lang-selector">
+      <span class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</span>
+      <span class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">HI</span>
+      <span class="lang-btn" data-lang="te" onclick="setLanguage('te')">TE</span>
+      <span class="lang-btn" data-lang="ta" onclick="setLanguage('ta')">TA</span>
+    </div>
+    <div id="nav-user" style="display:none;align-items:center;gap:10px">
+      <span class="btn btn-ghost btn-sm" id="nav-name"></span>
+      <button class="btn btn-sm btn-danger" onclick="logout()" data-i18n="nav_logout">Logout</button>
+    </div>
+    <div id="nav-guest" style="display:none;align-items:center;gap:8px">
+      <a href="login.html" class="btn btn-ghost btn-sm" data-i18n="nav_login">Login</a>
+      <a href="login.html" class="btn btn-primary btn-sm" data-i18n="nav_signup">Sign Up</a>
+    </div>
+    <button class="mobile-menu-btn" onclick="document.getElementById('mm').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+  </div>
+</nav>
+<div id="mm" class="navbar-mobile">
+  <a href="index.html">Home</a>
+  <a href="explore.html">Explore Fuels</a>
+  <a href="ai-features.html">AI Features</a>
+  <a href="analytics.html">Analytics</a>
+  <a href="admin.html">Admin</a>
+</div>
+
+<!-- Hero -->
+<div class="ai-hero">
+  <div class="container" style="position:relative;z-index:1">
+    <div class="ai-hero-badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      18 AI-Powered Features
+    </div>
+    <h1>EcoFuel <span style="color:#34d399">Intelligence</span> Suite</h1>
+    <p>From carbon footprint calculators to waste-to-energy estimators — our AI helps India transition to sustainable fuels, smarter and faster.</p>
+    <div class="ai-badges">
+      <span class="ai-badge">&#127807; Recommendation Engine</span>
+      <span class="ai-badge">&#9881; Carbon Calculator</span>
+      <span class="ai-badge">&#9748; Waste-to-Energy</span>
+      <span class="ai-badge">&#128200; Demand Forecast</span>
+      <span class="ai-badge">&#128172; AI Chatbot</span>
+      <span class="ai-badge">&#128269; Fraud Detection</span>
+      <span class="ai-badge">&#127774; Price Prediction</span>
+      <span class="ai-badge">&#127759; Area Intelligence</span>
+    </div>
+  </div>
+</div>
+
+<!-- 18 Feature Overview -->
+<section class="section" style="background:#f8fffe;border-bottom:1px solid var(--clr-border)">
+  <div class="container">
+    <div class="text-center mb-40">
+      <div class="hero-badge" style="display:inline-flex">All 18 AI Features</div>
+      <h2 class="section-title">What Our AI Can Do</h2>
+      <p class="section-sub">Every feature is live — explore the interactive tools below.</p>
+    </div>
+    <div class="feature-overview">
+      <!-- 1 -->
+      <div class="feature-card">
+        <span class="feature-num">#01</span>
+        <div class="feature-icon-box fi-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div class="feature-title">Recommendation Engine</div>
+        <div class="feature-desc">Suggests best fuel based on your city, budget, and use-case (home/vehicle/industrial).</div>
+      </div>
+      <!-- 2 -->
+      <div class="feature-card">
+        <span class="feature-num">#02</span>
+        <div class="feature-icon-box fi-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="feature-title">Location-Based Matching</div>
+        <div class="feature-desc">Matches buyers with the nearest verified sellers using city-to-city distance scoring.</div>
+      </div>
+      <!-- 3 -->
+      <div class="feature-card">
+        <span class="feature-num">#03</span>
+        <div class="feature-icon-box fi-orange">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="feature-title">Demand Prediction</div>
+        <div class="feature-desc">Predicts which cities will need more fuel next month using trend + weather modifiers.</div>
+      </div>
+      <!-- 4 -->
+      <div class="feature-card">
+        <span class="feature-num">#04</span>
+        <div class="feature-icon-box fi-yellow">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="feature-title">Price Prediction</div>
+        <div class="feature-desc">Suggests optimal pricing for sellers based on market data, season, and weather demand.</div>
+      </div>
+      <!-- 5 -->
+      <div class="feature-card">
+        <span class="feature-num">#05</span>
+        <div class="feature-icon-box fi-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <div class="feature-title">Route Optimization</div>
+        <div class="feature-desc">Calculates the shortest delivery path to minimize fuel consumption and delivery cost.</div>
+      </div>
+      <!-- 6 -->
+      <div class="feature-card">
+        <span class="feature-num">#06</span>
+        <div class="feature-icon-box fi-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
+        <div class="feature-title">Cost Comparison AI</div>
+        <div class="feature-desc">Compares petrol/diesel/LPG vs EcoFuels — shows exact ₹ savings per month.</div>
+      </div>
+      <!-- 7 -->
+      <div class="feature-card">
+        <span class="feature-num">#07</span>
+        <div class="feature-icon-box fi-teal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M2 22a8 8 0 0 1 8-8h4a8 8 0 0 1 8 8"/><circle cx="12" cy="8" r="4"/></svg>
+        </div>
+        <div class="feature-title">Carbon Footprint AI</div>
+        <div class="feature-desc">Calculates exact CO₂ saved by switching fuels. Shows monthly, annual, and tree equivalents.</div>
+      </div>
+      <!-- 8 -->
+      <div class="feature-card">
+        <span class="feature-num">#08</span>
+        <div class="feature-icon-box fi-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="feature-title">User Behavior Analysis</div>
+        <div class="feature-desc">Tracks searches and purchases to deliver smarter personalized fuel recommendations.</div>
+      </div>
+      <!-- 9 -->
+      <div class="feature-card">
+        <span class="feature-num">#09</span>
+        <div class="feature-icon-box fi-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="feature-title">AI Chatbot Assistant</div>
+        <div class="feature-desc">Answers questions about fuels, cost savings, installation, government schemes, and more.</div>
+      </div>
+      <!-- 10 -->
+      <div class="feature-card">
+        <span class="feature-num">#10</span>
+        <div class="feature-icon-box fi-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <div class="feature-title">Smart Classification</div>
+        <div class="feature-desc">Auto-detects fuel type and use-case from seller product descriptions using NLP.</div>
+      </div>
+      <!-- 11 -->
+      <div class="feature-card">
+        <span class="feature-num">#11</span>
+        <div class="feature-icon-box fi-red">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="feature-title">Fraud Detection</div>
+        <div class="feature-desc">Flags suspicious pricing, fake sellers, and anomalous stock quantities automatically.</div>
+      </div>
+      <!-- 12 -->
+      <div class="feature-card">
+        <span class="feature-num">#12</span>
+        <div class="feature-icon-box fi-orange">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </div>
+        <div class="feature-title">Supply-Demand Matching</div>
+        <div class="feature-desc">Balances supply (sellers) against demand (buyers) to show market gaps by area.</div>
+      </div>
+      <!-- 13 -->
+      <div class="feature-card">
+        <span class="feature-num">#13</span>
+        <div class="feature-icon-box fi-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
+        </div>
+        <div class="feature-title">Weather-Based Prediction</div>
+        <div class="feature-desc">Adjusts demand forecasts based on season (summer/monsoon/winter) for each fuel type.</div>
+      </div>
+      <!-- 14 -->
+      <div class="feature-card">
+        <span class="feature-num">#14</span>
+        <div class="feature-icon-box fi-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        </div>
+        <div class="feature-title">Waste-to-Energy AI</div>
+        <div class="feature-desc">Estimates biogas or biomass output from agricultural/organic waste types and quantities.</div>
+      </div>
+      <!-- 15 -->
+      <div class="feature-card">
+        <span class="feature-num">#15</span>
+        <div class="feature-icon-box fi-teal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="feature-title">Energy Consumption Insights</div>
+        <div class="feature-desc">Shows platform-wide usage trends, CO₂ saved by fuel type, and monthly order patterns.</div>
+      </div>
+      <!-- 16 -->
+      <div class="feature-card">
+        <span class="feature-num">#16</span>
+        <div class="feature-icon-box fi-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <div class="feature-title">Personalized Awareness AI</div>
+        <div class="feature-desc">Educates users about sustainable fuels based on their search behavior and purchase history.</div>
+      </div>
+      <!-- 17 -->
+      <div class="feature-card">
+        <span class="feature-num">#17</span>
+        <div class="feature-icon-box fi-yellow">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="feature-title">Area-wise Intelligence</div>
+        <div class="feature-desc">Shows which cities have highest eco-fuel adoption, supply gaps, and fuel mix distribution.</div>
+      </div>
+      <!-- 18 -->
+      <div class="feature-card">
+        <span class="feature-num">#18</span>
+        <div class="feature-icon-box fi-orange">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div class="feature-title">Smart Notifications</div>
+        <div class="feature-desc">Alerts buyers when prices drop, new sellers arrive nearby, or demand spikes in their city.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Interactive Tools -->
+<section class="section tool-section" id="tools">
+  <div class="container">
+    <div class="text-center mb-40">
+      <div class="hero-badge" style="display:inline-flex">Live AI Tools</div>
+      <h2 class="section-title">Try the AI Features</h2>
+      <p class="section-sub">Interactive calculators powered by real data from the platform.</p>
+    </div>
+
+    <!-- Tool 1: Carbon Calculator -->
+    <div class="tool-card" id="carbon">
+      <div class="tool-header">
+        <div class="tool-icon-box" style="background:#ccfbf1">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M2 22a8 8 0 0 1 8-8h4a8 8 0 0 1 8 8"/><circle cx="12" cy="8" r="4"/></svg>
+        </div>
+        <div>
+          <div class="tool-title">&#127807; Carbon Footprint Calculator</div>
+          <div class="tool-subtitle">Calculate CO&#8322; saved by switching from fossil to eco-fuel</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>I currently use</label>
+          <select id="cc-fossil">
+            <option value="petrol">Petrol (&#8377;106/L)</option>
+            <option value="diesel">Diesel (&#8377;92/L)</option>
+            <option value="lpg">LPG (&#8377;75/kg)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Switch to</label>
+          <select id="cc-eco">
+            <option value="bio-cng">Bio-CNG</option>
+            <option value="biogas">Biogas</option>
+            <option value="biofuel">Biofuel</option>
+            <option value="biomass">Biomass</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Monthly usage (units)</label>
+          <input type="number" id="cc-amount" value="100" min="1" max="10000">
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcCarbon()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Calculate
+      </button>
+      <div id="cc-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-card"><div class="result-val" id="cc-co2">0</div><div class="result-label">CO&#8322; Saved (kg/unit)</div></div>
+          <div class="result-card"><div class="result-val" id="cc-pct">0%</div><div class="result-label">Emission Reduction</div></div>
+          <div class="result-card"><div class="result-val" id="cc-trees">0</div><div class="result-label">Trees Equivalent</div></div>
+          <div class="result-card"><div class="result-val" id="cc-money">&#8377;0</div><div class="result-label">Monthly Savings</div></div>
+          <div class="result-card"><div class="result-val" id="cc-annual">0 kg</div><div class="result-label">Annual CO&#8322; Saved</div></div>
+        </div>
+        <div class="result-insight" id="cc-insight"></div>
+      </div>
+    </div>
+
+    <!-- Tool 2: Waste-to-Energy -->
+    <div class="tool-card" id="waste">
+      <div class="tool-header">
+        <div class="tool-icon-box" style="background:#dcfce7">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        </div>
+        <div>
+          <div class="tool-title">&#9851; Waste-to-Energy Estimator</div>
+          <div class="tool-subtitle">See how much biogas or biomass your waste can produce</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Waste Type</label>
+          <select id="we-type">
+            <option value="cow_dung">Cow Dung</option>
+            <option value="food_waste">Kitchen / Food Waste</option>
+            <option value="agri_waste">Agricultural Waste</option>
+            <option value="sugarcane">Sugarcane Bagasse</option>
+            <option value="rice_husk">Rice Husk</option>
+            <option value="wood_chips">Wood Chips / Sawdust</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantity (kg/day)</label>
+          <input type="number" id="we-qty" value="50" min="1" max="100000">
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcWaste()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Estimate
+      </button>
+      <div id="we-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-card"><div class="result-val" id="we-output">0</div><div class="result-label" id="we-output-label">Output</div></div>
+          <div class="result-card"><div class="result-val" id="we-value">&#8377;0</div><div class="result-label">Market Value / Day</div></div>
+          <div class="result-card"><div class="result-val" id="we-co2">0 kg</div><div class="result-label">CO&#8322; Saved / Day</div></div>
+          <div class="result-card"><div class="result-val" id="we-days">0</div><div class="result-label" id="we-days-label">Cooking Days / Day</div></div>
+        </div>
+        <div class="result-insight" id="we-insight"></div>
+      </div>
+    </div>
+
+    <!-- Tool 3: Cost Comparison -->
+    <div class="tool-card" id="cost-compare">
+      <div class="tool-header">
+        <div class="tool-icon-box" style="background:#fef9c3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
+        <div>
+          <div class="tool-title">&#128200; Cost Comparison AI</div>
+          <div class="tool-subtitle">Compare fossil vs eco-fuels — monthly &#8377; savings &amp; CO&#8322; reduction</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Use Case</label>
+          <select id="cmp-use">
+            <option value="vehicle">Vehicle / Transport</option>
+            <option value="home">Home / Cooking</option>
+            <option value="industrial">Industrial / Factory</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Monthly Usage (units)</label>
+          <input type="number" id="cmp-usage" value="100" min="1">
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcComparison()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Compare
+      </button>
+      <div id="cmp-result" style="display:none;margin-top:20px;overflow-x:auto">
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th>Fuel</th><th>Price/Unit</th><th>Monthly Cost</th><th>Monthly CO&#8322;</th><th>Monthly Savings</th><th>CO&#8322; Reduction</th>
+            </tr>
+          </thead>
+          <tbody id="cmp-tbody"></tbody>
+        </table>
+        <div class="result-insight" id="cmp-insight"></div>
+      </div>
+    </div>
+
+    <!-- Tool 4: Demand Forecast -->
+    <div class="tool-card" id="demand">
+      <div class="tool-header">
+        <div class="tool-icon-box" style="background:#ffedd5">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div>
+          <div class="tool-title">&#128208; Demand Forecast (Next Month)</div>
+          <div class="tool-subtitle">AI-predicted demand growth by city and fuel type, adjusted for season</div>
+        </div>
+      </div>
+      <button class="calc-btn" onclick="loadForecast()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Load Forecast
+      </button>
+      <div id="forecast-result" style="display:none" class="forecast-bar-wrap"></div>
+    </div>
+
+    <!-- Tool 5: Price Prediction for Sellers -->
+    <div class="tool-card" id="price">
+      <div class="tool-header">
+        <div class="tool-icon-box" style="background:#fef9c3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div>
+          <div class="tool-title">&#127774; Price Prediction (For Sellers)</div>
+          <div class="tool-subtitle">AI recommends the optimal market price based on season and demand</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fuel Type</label>
+          <select id="pp-fuel">
+            <option value="biogas">Biogas</option>
+            <option value="bio-cng">Bio-CNG</option>
+            <option value="biofuel">Biofuel</option>
+            <option value="biomass">Biomass</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>City (optional)</label>
+          <select id="pp-city">
+            <option value="">All Cities</option>
+            <option>Delhi</option><option>Mumbai</option><option>Bangalore</option>
+            <option>Chennai</option><option>Pune</option><option>Hyderabad</option>
+          </select>
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcPrice()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Predict Price
+      </button>
+      <div id="pp-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-card"><div class="result-val" id="pp-avg">&#8377;0</div><div class="result-label">Market Average</div></div>
+          <div class="result-card"><div class="result-val" id="pp-recommended">&#8377;0</div><div class="result-label">Recommended Price</div></div>
+          <div class="result-card"><div class="result-val" id="pp-trend">0%</div><div class="result-label">Price Trend</div></div>
+          <div class="result-card"><div class="result-val" id="pp-season">—</div><div class="result-label">Current Season</div></div>
+        </div>
+        <div class="result-insight" id="pp-insight"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section" style="text-align:center;background:#fff">
+  <div class="container">
+    <div style="max-width:640px;margin:0 auto">
+      <div class="hero-badge" style="display:inline-flex;margin-bottom:16px">Start Today</div>
+      <h2 class="section-title">Ready to Switch to Smarter Fuel?</h2>
+      <p class="section-sub">Browse verified eco-fuel sellers, get AI recommendations, and start saving money and the planet.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px">
+        <a href="explore.html" class="btn btn-primary" style="font-size:1rem;padding:12px 32px">Explore Fuels</a>
+        <a href="analytics.html" class="btn btn-outline" style="font-size:1rem;padding:12px 32px">View Analytics</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="js/api.js"></script>
+<script>
+  // ── Auth nav ──
+  const u = getUser();
+  if (u) {
+    document.getElementById('nav-user').style.display = 'flex';
+    document.getElementById('nav-name').textContent = u.name;
+  } else {
+    document.getElementById('nav-guest').style.display = 'flex';
+  }
+
+  // ── Carbon Calculator ──
+  async function calcCarbon() {
+    const fossil = document.getElementById('cc-fossil').value;
+    const eco    = document.getElementById('cc-eco').value;
+    const amount = parseFloat(document.getElementById('cc-amount').value) || 100;
+
+    try {
+      const res = await fetch('/api/ai/carbon-calculator', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ fuel_type: eco, amount, fossil_fuel: fossil })
+      });
+      const d = await res.json();
+
+      document.getElementById('cc-co2').textContent    = d.co2_saved_kg + ' kg';
+      document.getElementById('cc-pct').textContent    = d.co2_saved_pct + '%';
+      document.getElementById('cc-trees').textContent  = d.trees_equivalent;
+      document.getElementById('cc-money').textContent  = '₹' + d.money_saved_inr.toFixed(0);
+      document.getElementById('cc-annual').textContent = d.annual_co2_kg + ' kg';
+      document.getElementById('cc-insight').textContent= d.impact_statement;
+      document.getElementById('cc-result').style.display = 'block';
+    } catch(e) {
+      // Fallback calculation
+      const co2Map  = {petrol:2.31,diesel:2.68,lpg:1.51,biogas:0.4,'bio-cng':0.55,biofuel:0.7,biomass:0.35};
+      const priceMap= {petrol:106,diesel:92,lpg:75,biogas:30,'bio-cng':45,biofuel:62,biomass:15};
+      const saved   = Math.max(0, (co2Map[fossil]||2.31 - co2Map[eco]||0.5) * amount);
+      const money   = Math.max(0, (priceMap[fossil]||106 - priceMap[eco]||50) * amount);
+      document.getElementById('cc-co2').textContent    = saved.toFixed(2) + ' kg';
+      document.getElementById('cc-pct').textContent    = Math.round(saved/(co2Map[fossil]||2.31)/amount*100) + '%';
+      document.getElementById('cc-trees').textContent  = (saved/21).toFixed(1);
+      document.getElementById('cc-money').textContent  = '₹' + money.toFixed(0);
+      document.getElementById('cc-annual').textContent = (saved*365).toFixed(0) + ' kg';
+      document.getElementById('cc-insight').textContent= 'Switching saves approx ' + saved.toFixed(2) + ' kg CO₂ per unit and ₹' + money.toFixed(0) + ' per unit!';
+      document.getElementById('cc-result').style.display = 'block';
+    }
+  }
+
+  // ── Waste-to-Energy ──
+  async function calcWaste() {
+    const waste = document.getElementById('we-type').value;
+    const qty   = parseFloat(document.getElementById('we-qty').value) || 50;
+    try {
+      const res = await fetch('/api/ai/waste-to-energy', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ waste_type: waste, quantity_kg: qty })
+      });
+      const d = await res.json();
+      document.getElementById('we-output').textContent      = d.output_amount + ' ' + d.output_unit;
+      document.getElementById('we-output-label').textContent= d.output_type;
+      document.getElementById('we-value').textContent       = '₹' + d.market_value_inr;
+      document.getElementById('we-co2').textContent         = d.co2_saved_kg + ' kg';
+      if (d.days_of_cooking !== undefined) {
+        document.getElementById('we-days').textContent      = d.days_of_cooking;
+        document.getElementById('we-days-label').textContent= 'Family Cooking Days';
+      } else {
+        document.getElementById('we-days').textContent      = d.days_of_boiler || '—';
+        document.getElementById('we-days-label').textContent= 'Boiler Days (Industrial)';
+      }
+      document.getElementById('we-insight').textContent     = d.insight;
+      document.getElementById('we-result').style.display    = 'block';
+    } catch(e) {
+      alert('Could not connect to server. Please ensure the backend is running.');
+    }
+  }
+
+  // ── Cost Comparison ──
+  async function calcComparison() {
+    const use   = document.getElementById('cmp-use').value;
+    const usage = parseFloat(document.getElementById('cmp-usage').value) || 100;
+    try {
+      const res = await fetch(`/api/ai/cost-comparison?use_case=${use}&monthly_usage=${usage}`);
+      const d   = await res.json();
+      const tbody = document.getElementById('cmp-tbody');
+      tbody.innerHTML = d.comparisons.map(c => `
+        <tr class="${c.category === 'Fossil' ? 'fossil' : 'eco'}">
+          <td><strong>${c.fuel.toUpperCase()}</strong> ${c.category === 'Eco' ? '<span style="font-size:0.7rem;background:#dcfce7;color:#166534;border-radius:4px;padding:1px 6px">ECO</span>' : ''}</td>
+          <td>₹${c.price_per_unit}</td>
+          <td><strong>₹${c.monthly_cost.toLocaleString('en-IN')}</strong></td>
+          <td>${c.monthly_co2_kg} kg</td>
+          <td>${c.monthly_savings > 0 ? `<span class="savings-pill">Save ₹${c.monthly_savings.toLocaleString('en-IN')}</span>` : c.monthly_savings < 0 ? `<span class="loss-pill">+₹${Math.abs(c.monthly_savings).toLocaleString('en-IN')}</span>` : '—'}</td>
+          <td>${c.co2_savings_pct > 0 ? `<span class="savings-pill">${c.co2_savings_pct}% less</span>` : '—'}</td>
+        </tr>`).join('');
+      if (d.best_eco) {
+        document.getElementById('cmp-insight').textContent = `Best eco option: ${d.best_eco.fuel.toUpperCase()} — saves ₹${d.best_eco.monthly_savings.toLocaleString('en-IN')}/month and ${d.best_eco.co2_savings_pct}% less CO₂!`;
+      }
+      document.getElementById('cmp-result').style.display = 'block';
+    } catch(e) {
+      alert('Could not connect to server.');
+    }
+  }
+
+  // ── Demand Forecast ──
+  async function loadForecast() {
+    try {
+      const res  = await fetch('/api/ai/demand-forecast');
+      const data = await res.json();
+      const container = document.getElementById('forecast-result');
+      if (!data.length) {
+        container.innerHTML = '<p class="text-muted" style="margin-top:16px">No forecast data available yet — orders needed.</p>';
+        container.style.display = 'block';
+        return;
+      }
+      const maxForecast = Math.max(...data.map(d => d.forecast_next_month));
+      container.innerHTML = data.slice(0,10).map(d => `
+        <div class="forecast-row">
+          <div class="forecast-label">${d.city}<br><small style="color:var(--clr-text-3);font-size:0.7rem">${d.fuel_type}</small></div>
+          <div class="forecast-bar-track">
+            <div class="forecast-bar-fill" style="width:${(d.forecast_next_month/maxForecast*100).toFixed(1)}%"></div>
+          </div>
+          <div class="forecast-pct">+${d.growth_pct}%</div>
+        </div>`).join('');
+      container.style.display = 'block';
+    } catch(e) {
+      document.getElementById('forecast-result').innerHTML = '<p class="text-muted" style="margin-top:16px">Server not reachable.</p>';
+      document.getElementById('forecast-result').style.display = 'block';
+    }
+  }
+
+  // ── Price Prediction ──
+  async function calcPrice() {
+    const fuel = document.getElementById('pp-fuel').value;
+    const city = document.getElementById('pp-city').value;
+    try {
+      const res = await fetch(`/api/ai/price-prediction?fuel_type=${fuel}&city=${city}`);
+      const d   = await res.json();
+      document.getElementById('pp-avg').textContent        = '₹' + d.current_avg_price;
+      document.getElementById('pp-recommended').textContent= '₹' + d.recommended_seller_price;
+      document.getElementById('pp-trend').textContent      = (d.trend_pct > 0 ? '+' : '') + d.trend_pct + '%';
+      document.getElementById('pp-trend').style.color      = d.trend_pct >= 0 ? 'var(--clr-primary)' : '#dc2626';
+      document.getElementById('pp-season').textContent     = d.season.charAt(0).toUpperCase() + d.season.slice(1);
+      document.getElementById('pp-insight').textContent    = d.insight;
+      document.getElementById('pp-result').style.display   = 'block';
+    } catch(e) {
+      alert('Could not connect to server.');
+    }
+  }
+</script>
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>

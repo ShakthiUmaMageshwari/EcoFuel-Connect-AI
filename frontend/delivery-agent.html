@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delivery Partner — EcoFuel Connect AI</title>
+  <meta name="description" content="EcoFuel Delivery Partner dashboard. Track live deliveries, agent location, earnings and delivery status — Zepto-style.">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/translations.js"></script>
+  <script src="js/i18n.js" defer></script>
+  <style>
+    /* ── Delivery Agent Theme — uses project green palette ── */
+    :root {
+      --da-purple:   var(--clr-primary);
+      --da-purple-l: var(--clr-primary-light);
+      --da-indigo:   var(--clr-teal);
+      --da-violet:   var(--clr-primary-dark);
+      --grad-da:     var(--grad-primary);
+      --grad-da-2:   var(--grad-accent);
+    }
+
+    /* ── Page Header ── */
+    .da-hero {
+      background: linear-gradient(135deg, #064e23 0%, #0a3d1f 50%, #073d1f 100%);
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+    }
+    .da-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(22,163,74,0.35) 0%, transparent 55%),
+                  radial-gradient(ellipse at 20% 80%, rgba(13,148,136,0.25) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .da-hero-inner {
+      position: relative; z-index: 1;
+      width: 100%; padding: 36px 24px 36px;
+      max-width: 1240px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+      flex-wrap: wrap;
+    }
+    .da-hero-left { display: flex; align-items: center; gap: 20px; }
+    .da-hero-badge {
+      width: 62px; height: 62px;
+      background: var(--grad-primary);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: var(--shadow-green);
+      flex-shrink: 0;
+    }
+    .da-hero-title { font-family: var(--font-head); color: #fff; font-size: 1.7rem; font-weight: 800; margin-bottom: 4px; }
+    .da-hero-sub   { color: rgba(255,255,255,0.6); font-size: 0.88rem; }
+    .da-hero-pills { display: flex; gap: 10px; flex-wrap: wrap; }
+    .da-pill {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 99px;
+      padding: 6px 16px;
+      color: #fff;
+      font-size: 0.8rem; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+      backdrop-filter: blur(6px);
+    }
+    .da-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-green  { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .dot-amber  { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+    .dot-gray   { background: #6b7280; }
+    .dot-teal { background: var(--clr-teal); box-shadow: 0 0 6px var(--clr-teal); }
+
+    /* ── Summary Stats Row ── */
+    .da-stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .da-stat {
+      background: #fff;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
+      transition: var(--transition);
+    }
+    .da-stat:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .da-stat-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; margin-bottom: 12px;
+    }
+    .da-stat-val  { font-family: var(--font-head); font-size: 2rem; font-weight: 800; line-height: 1; }
+    .da-stat-lbl  { font-size: 0.8rem; color: var(--clr-text-2); margin-top: 4px; }
+    .da-stat-glow {
+      position: absolute; top: -20px; right: -20px;
+      width: 80px; height: 80px; border-radius: 50%;
+      opacity: 0.12; pointer-events: none;
+    }
+    .glow-green  { background: #22c55e; }
+    .glow-amber  { background: #f59e0b; }
+    .glow-teal   { background: var(--clr-teal); }
+    .glow-blue   { background: #3b82f6; }
+    .icon-bg-green  { background: #dcfce7; }
+    .icon-bg-amber  { background: #fef3c7; }
+    .icon-bg-teal   { background: #ccfbf1; }
+    .icon-bg-blue   { background: #dbeafe; }
+
+    /* ── Main Layout ── */
+    .da-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ── Agent List Panel ── */
+    .da-panel {
+      background: #fff;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xs);
+      overflow: hidden;
+    }
+    .da-panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--clr-border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fafbff;
+    }
+    .da-panel-title {
+      font-family: var(--font-head);
+      font-size: 0.95rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .da-filter-row {
+      padding: 12px 16px;
+      background: #f8f9fc;
+      border-bottom: 1px solid var(--clr-border);
+      display: flex; gap: 8px;
+    }
+    .da-filter-btn {
+      padding: 5px 14px; border-radius: 99px;
+      font-size: 0.78rem; font-weight: 600;
+      border: 1.5px solid var(--clr-border);
+      background: #fff; color: var(--clr-text-2);
+      cursor: pointer; transition: var(--transition);
+    }
+    .da-filter-btn.active,
+    .da-filter-btn:hover {
+      background: var(--grad-primary); color: #fff; border-color: transparent;
+    }
+
+    /* ── Agent Card ── */
+    .agent-card {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--clr-border);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .agent-card:last-child { border-bottom: none; }
+    .agent-card:hover, .agent-card.selected { background: #f0fdf4; }
+    .agent-card.selected { border-left: 3px solid var(--clr-primary); }
+    .agent-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: var(--grad-primary);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-family: var(--font-head); font-size: 1.05rem; font-weight: 700;
+      flex-shrink: 0; position: relative;
+    }
+    .agent-status-dot {
+      position: absolute; bottom: 0; right: 0;
+      width: 13px; height: 13px; border-radius: 50%;
+      border: 2.5px solid #fff;
+    }
+    .status-online    { background: #22c55e; }
+    .status-on_delivery { background: #f59e0b; }
+    .status-offline   { background: #9ca3af; }
+    .agent-info { flex: 1; min-width: 0; }
+    .agent-name { font-weight: 700; font-size: 0.9rem; color: var(--clr-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .agent-meta { font-size: 0.78rem; color: var(--clr-text-2); margin-top: 2px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .agent-right { text-align: right; flex-shrink: 0; }
+    .agent-deliveries-count { font-family: var(--font-head); font-size: 1.1rem; font-weight: 800; color: var(--clr-primary); }
+    .agent-deliveries-lbl { font-size: 0.7rem; color: var(--clr-text-3); }
+    .status-label {
+      display: inline-block; padding: 3px 10px;
+      border-radius: 99px; font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+    .sl-online     { background: #dcfce7; color: #15803d; }
+    .sl-on_delivery { background: #fef3c7; color: #b45309; }
+    .sl-offline    { background: #f3f4f6; color: #6b7280; }
+
+    /* ── Detail Panel (right) ── */
+    .da-detail-wrap {
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    /* ── Agent Detail Card ── */
+    .agent-detail-card {
+      background: #fff;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
+    }
+    .agent-detail-hero {
+      background: linear-gradient(135deg, #052e16, #064e23);
+      padding: 28px 28px 20px;
+      position: relative; overflow: hidden;
+    }
+    .agent-detail-hero::after {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 160px; height: 160px; border-radius: 50%;
+      background: rgba(22,163,74,0.25);
+      pointer-events: none;
+    }
+    .agent-detail-top  { display: flex; align-items: center; gap: 18px; position: relative; z-index: 1; }
+    .agent-big-avatar {
+      width: 70px; height: 70px; border-radius: 20px;
+      background: var(--grad-primary);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-family: var(--font-head); font-size: 1.7rem; font-weight: 800;
+      box-shadow: var(--shadow-green);
+      flex-shrink: 0;
+    }
+    .agent-detail-name { color: #fff; font-family: var(--font-head); font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; }
+    .agent-detail-sub  { color: rgba(255,255,255,0.6); font-size: 0.82rem; display: flex; gap: 14px; flex-wrap: wrap; }
+    .agent-detail-sub span { display: flex; align-items: center; gap: 5px; }
+    .rating-stars { color: #fbbf24; font-size: 0.9rem; }
+
+    .agent-body { padding: 22px 28px; }
+
+    /* ── Info Grid ── */
+    .info-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+      margin-bottom: 22px;
+    }
+    .info-cell {
+      background: var(--clr-bg);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: 13px 16px;
+    }
+    .info-cell-icon { font-size: 1.3rem; margin-bottom: 6px; }
+    .info-cell-val  { font-family: var(--font-head); font-size: 1.1rem; font-weight: 800; color: var(--clr-text); }
+    .info-cell-lbl  { font-size: 0.73rem; color: var(--clr-text-3); margin-top: 2px; }
+
+    /* ── Location Strip ── */
+    .location-strip {
+      background: linear-gradient(135deg, rgba(22,163,74,0.07), rgba(13,148,136,0.04));
+      border: 1px solid rgba(22,163,74,0.18);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 18px;
+    }
+    .loc-map-pin {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--grad-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+      box-shadow: var(--shadow-green);
+    }
+    .loc-main { font-weight: 700; font-size: 0.9rem; color: var(--clr-text); }
+    .loc-sub  { font-size: 0.78rem; color: var(--clr-text-2); margin-top: 3px; }
+    .loc-coords {
+      margin-left: auto; text-align: right; flex-shrink: 0;
+    }
+    .loc-coords-val { font-family: monospace; font-size: 0.8rem; color: var(--clr-primary); font-weight: 700; }
+    .loc-coords-lbl { font-size: 0.7rem; color: var(--clr-text-3); }
+
+    /* ── Vehicle Row ── */
+    .vehicle-row {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--clr-bg);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 18px;
+    }
+    .vehicle-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: #dcfce7; display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .vehicle-name { font-weight: 700; font-size: 0.9rem; }
+    .vehicle-num  { font-size: 0.78rem; color: var(--clr-text-2); font-family: monospace; }
+    .eco-badge {
+      margin-left: auto;
+      background: #dcfce7; border: 1px solid #bbf7d0;
+      border-radius: 99px; padding: 4px 12px;
+      font-size: 0.74rem; font-weight: 700; color: #15803d;
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    /* ── Today's Delivery Progress ── */
+    .today-progress {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 1px solid rgba(22,163,74,0.18);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 18px;
+    }
+    .today-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .today-lbl { font-size: 0.82rem; font-weight: 700; color: var(--clr-primary-dark); }
+    .today-val { font-family: var(--font-head); font-size: 1rem; font-weight: 800; color: var(--clr-primary); }
+    .progress-bar-bg {
+      width: 100%; height: 8px; background: rgba(22,163,74,0.15);
+      border-radius: 99px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 99px;
+      background: var(--grad-primary);
+      transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+    .progress-note { font-size: 0.73rem; color: var(--clr-primary-dark); margin-top: 6px; opacity: 0.75; }
+
+    /* ── Action Buttons ── */
+    .agent-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-da-primary {
+      flex: 1; min-width: 120px;
+      background: var(--grad-primary); color: #fff;
+      border: none; border-radius: var(--radius);
+      padding: 10px 18px; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .btn-da-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-green); }
+    .btn-da-outline {
+      flex: 1; min-width: 120px;
+      background: #fff; color: var(--clr-primary);
+      border: 1.5px solid rgba(22,163,74,0.4);
+      border-radius: var(--radius);
+      padding: 10px 18px; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .btn-da-outline:hover { background: #f0fdf4; }
+    .btn-da-danger {
+      background: #fff; color: #dc2626;
+      border: 1.5px solid #fca5a5;
+      border-radius: var(--radius);
+      padding: 10px 18px; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .btn-da-danger:hover { background: #fff0f0; }
+
+    /* ── Active Deliveries Panel ── */
+    .active-delivery-card {
+      background: #fff;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px;
+      box-shadow: var(--shadow-xs);
+    }
+    .adel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .adel-id { font-family: monospace; font-weight: 800; font-size: 0.9rem; color: var(--clr-primary); }
+    .adel-status-pill {
+      padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;
+    }
+    .asp-picked   { background: #fef3c7; color: #b45309; }
+    .asp-enroute  { background: #dbeafe; color: #1d4ed8; }
+    .asp-done     { background: #dcfce7; color: #15803d; }
+
+    .adel-route {
+      display: flex; flex-direction: column; gap: 0;
+      position: relative; margin-bottom: 16px;
+    }
+    .adel-route::before {
+      content: '';
+      position: absolute; left: 14px; top: 28px;
+      width: 2px; bottom: 28px;
+      background: linear-gradient(to bottom, var(--clr-primary-dark), var(--clr-teal));
+    }
+    .adel-stop {
+      display: flex; align-items: flex-start; gap: 14px; padding: 6px 0;
+      position: relative; z-index: 1;
+    }
+    .adel-stop-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; flex-shrink: 0;
+      border: 2px solid #fff; box-shadow: var(--shadow-xs);
+    }
+    .dot-pickup  { background: var(--clr-primary-dark); color: #fff; }
+    .dot-dropoff { background: var(--clr-teal); color: #fff; }
+    .adel-stop-info { flex: 1; }
+    .adel-stop-label { font-size: 0.7rem; font-weight: 700; color: var(--clr-text-3); text-transform: uppercase; letter-spacing: 0.06em; }
+    .adel-stop-name  { font-weight: 700; font-size: 0.9rem; color: var(--clr-text); margin: 2px 0; }
+    .adel-stop-addr  { font-size: 0.78rem; color: var(--clr-text-2); line-height: 1.4; }
+
+    .adel-meta {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+    }
+    .adel-meta-chip {
+      background: var(--clr-bg); border: 1px solid var(--clr-border);
+      border-radius: 99px; padding: 4px 12px;
+      font-size: 0.77rem; color: var(--clr-text-2);
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    /* ── ETA Bar ── */
+    .eta-bar {
+      background: linear-gradient(135deg, rgba(22,163,74,0.07), rgba(13,148,136,0.04));
+      border: 1px solid rgba(22,163,74,0.15);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .eta-left  { font-size: 0.82rem; color: var(--clr-text-2); }
+    .eta-val   { font-family: var(--font-head); font-size: 1.15rem; font-weight: 800; color: var(--clr-primary); }
+    .eta-right { text-align: right; }
+    .eta-dist  { font-size: 0.82rem; color: var(--clr-text-2); }
+    .eta-dist-val { font-weight: 700; color: var(--clr-text); }
+
+    /* ── Empty detail ── */
+    .da-empty {
+      background: #fff;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: 60px 24px;
+      text-align: center;
+      color: var(--clr-text-2);
+      box-shadow: var(--shadow-xs);
+    }
+    .da-empty-icon { font-size: 3.5rem; margin-bottom: 16px; }
+    .da-empty h3 { font-size: 1.1rem; color: var(--clr-text); margin-bottom: 8px; }
+
+    /* Responsive */
+    @media(max-width: 1024px) { .da-layout { grid-template-columns: 1fr; } .da-stats-row { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width: 640px)  { .da-stats-row { grid-template-columns: repeat(2, 1fr); } .info-grid { grid-template-columns: repeat(2, 1fr); } .da-hero-pills { display: none; } }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  🚴 EcoFuel Express Delivery — Eco-certified partners delivering green fuel across India &nbsp;|&nbsp; Avg. delivery time: 22 min
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="/images/logo.png" alt="EcoFuel Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover">
+    <span class="brand-text">EcoFuel <span>Connect</span></span>
+  </a>
+  <ul class="navbar-nav">
+    <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+    <li><a href="explore.html" data-i18n="nav_explore">Explore Fuels</a></li>
+    <li><a href="ai-features.html" data-i18n="nav_ai">AI Features</a></li>
+    <li><a href="analytics.html" data-i18n="nav_analytics">Analytics</a></li>
+    <li><a href="delivery-agent.html" class="active">🚴 Delivery</a></li>
+    <li id="nav-seller" style="display:none"><a href="seller-dashboard.html">Seller</a></li>
+    <li id="nav-admin" style="display:none"><a href="admin.html">Admin</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <div class="lang-selector">
+      <span class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</span>
+      <span class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">HI</span>
+      <span class="lang-btn" data-lang="te" onclick="setLanguage('te')">TE</span>
+      <span class="lang-btn" data-lang="ta" onclick="setLanguage('ta')">TA</span>
+    </div>
+    <a id="nav-login" href="login.html" class="btn btn-outline btn-sm">Login / Signup</a>
+    <div id="nav-user" style="display:none;align-items:center;gap:10px">
+      <a href="user-dashboard.html" class="btn btn-ghost btn-sm">My Account &nbsp;<span id="nav-username"></span></a>
+      <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+    </div>
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu">&#9776;</button>
+  </div>
+</nav>
+<div id="mobile-menu" class="navbar-mobile">
+  <a href="index.html">Home</a>
+  <a href="explore.html">Explore Fuels</a>
+  <a href="ai-features.html">AI Features</a>
+  <a href="analytics.html">Analytics</a>
+  <a href="delivery-agent.html">🚴 Delivery Partners</a>
+  <a href="login.html">Login / Signup</a>
+</div>
+
+<!-- Hero -->
+<div class="da-hero">
+  <div class="da-hero-inner">
+    <div class="da-hero-left">
+      <div class="da-hero-badge">🚴</div>
+      <div>
+        <div class="da-hero-title">Delivery Partner Hub</div>
+        <div class="da-hero-sub">Real-time agent tracking · Live deliveries · Earnings dashboard</div>
+      </div>
+    </div>
+    <div class="da-hero-pills" id="hero-pills">
+      <div class="da-pill"><span class="dot dot-green"></span> <span id="pill-online">—</span> Online</div>
+      <div class="da-pill"><span class="dot dot-amber"></span> <span id="pill-on_delivery">—</span> On Delivery</div>
+      <div class="da-pill"><span class="dot dot-gray"></span>  <span id="pill-offline">—</span> Offline</div>
+      <div class="da-pill"><span class="dot dot-teal"></span> <span id="pill-active_del">—</span> Active Deliveries</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container" style="padding-top:28px; padding-bottom:48px">
+
+  <!-- Stats Row -->
+  <div class="da-stats-row mb-24">
+    <div class="da-stat">
+      <div class="da-stat-glow glow-green"></div>
+      <div class="da-stat-icon icon-bg-green">🟢</div>
+      <div class="da-stat-val" id="stat-total-agents">—</div>
+      <div class="da-stat-lbl">Total Agents</div>
+    </div>
+    <div class="da-stat">
+      <div class="da-stat-glow glow-amber"></div>
+      <div class="da-stat-icon icon-bg-amber">🛵</div>
+      <div class="da-stat-val" id="stat-today-del">—</div>
+      <div class="da-stat-lbl">Today's Deliveries</div>
+    </div>
+    <div class="da-stat">
+      <div class="da-stat-glow glow-teal"></div>
+      <div class="da-stat-icon icon-bg-teal">⭐</div>
+      <div class="da-stat-val" id="stat-avg-rating">—</div>
+      <div class="da-stat-lbl">Avg Partner Rating</div>
+    </div>
+    <div class="da-stat">
+      <div class="da-stat-glow glow-blue"></div>
+      <div class="da-stat-icon icon-bg-blue">💰</div>
+      <div class="da-stat-val" id="stat-today-earn">—</div>
+      <div class="da-stat-lbl">Today's Total Earnings</div>
+    </div>
+  </div>
+
+  <!-- Two-column layout -->
+  <div class="da-layout">
+
+    <!-- Left: Agent List -->
+    <div>
+      <div class="da-panel">
+        <div class="da-panel-header">
+          <div class="da-panel-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Delivery Partners
+          </div>
+          <span class="tag" id="agent-count-tag">— agents</span>
+        </div>
+        <div class="da-filter-row">
+          <button class="da-filter-btn active" id="filter-all" onclick="filterAgents('all')">All</button>
+          <button class="da-filter-btn" id="filter-online" onclick="filterAgents('online')">🟢 Online</button>
+          <button class="da-filter-btn" id="filter-on_delivery" onclick="filterAgents('on_delivery')">🟡 Delivering</button>
+          <button class="da-filter-btn" id="filter-offline" onclick="filterAgents('offline')">⚫ Offline</button>
+        </div>
+        <div id="agent-list">
+          <div style="padding:32px;text-align:center"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Detail + Active Deliveries -->
+    <div class="da-detail-wrap">
+
+      <!-- Agent detail -->
+      <div id="agent-detail">
+        <div class="da-empty">
+          <div class="da-empty-icon">👆</div>
+          <h3>Select a Delivery Partner</h3>
+          <p>Click any agent from the list to see their full profile, location, vehicle, and today's performance.</p>
+        </div>
+      </div>
+
+      <!-- Active Deliveries -->
+      <div class="da-panel">
+        <div class="da-panel-header">
+          <div class="da-panel-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Live Active Deliveries
+          </div>
+          <span class="tag" style="background:#fef3c7;color:#b45309;border-color:#fde68a" id="live-del-count">— active</span>
+        </div>
+        <div id="active-deliveries-list" style="padding:16px;display:flex;flex-direction:column;gap:14px">
+          <div style="padding:20px;text-align:center"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="js/api.js"></script>
+<script>
+  const API = 'http://localhost:5000/api/delivery';
+
+  let allAgents = [];
+  let currentFilter = 'all';
+  let selectedAgentId = null;
+
+  // ── Helpers ────────────────────────────────────────────────────────────
+  function initials(name) {
+    return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+  }
+  function stars(r) {
+    const full = Math.floor(r);
+    const half = r % 1 >= 0.5;
+    let s = '★'.repeat(full);
+    if (half) s += '½';
+    return s;
+  }
+  function vehicleIcon(v) {
+    const icons = {
+      'Electric Scooter': '⚡🛵', 'Electric Bike': '⚡🚲',
+      'CNG Auto': '🛺', 'Bicycle': '🚲', 'default': '🛵'
+    };
+    return icons[v] || icons.default;
+  }
+  function statusLabel(s) {
+    const m = { online: ['sl-online','Online'], on_delivery: ['sl-on_delivery','On Delivery'], offline: ['sl-offline','Offline'] };
+    const [cls, txt] = m[s] || ['sl-offline','Unknown'];
+    return `<span class="status-label ${cls}">${txt}</span>`;
+  }
+  function deliveryStatusPill(s) {
+    const m = { picked_up: ['asp-picked','Picked Up'], en_route: ['asp-enroute','En Route'], done: ['asp-done','Done'] };
+    const [cls, txt] = m[s] || ['asp-enroute', s];
+    return `<span class="adel-status-pill ${cls}">${txt}</span>`;
+  }
+
+  // ── Fetch & Render Stats ────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const r = await fetch(`${API}/stats`);
+      const d = await r.json();
+      document.getElementById('stat-total-agents').textContent = d.total_agents;
+      document.getElementById('stat-today-del').textContent    = d.today_deliveries;
+      document.getElementById('stat-avg-rating').textContent   = d.avg_rating;
+      document.getElementById('stat-today-earn').textContent   = '₹' + d.today_earnings.toLocaleString('en-IN');
+      document.getElementById('pill-online').textContent       = d.online;
+      document.getElementById('pill-on_delivery').textContent  = d.on_delivery;
+      document.getElementById('pill-offline').textContent      = d.offline;
+      document.getElementById('pill-active_del').textContent   = d.active_deliveries;
+    } catch(e) { console.warn('Stats load failed', e); }
+  }
+
+  // ── Fetch & Render Agents ───────────────────────────────────────────────
+  async function loadAgents() {
+    try {
+      const r = await fetch(`${API}/agents`);
+      allAgents = await r.json();
+      renderAgents(allAgents);
+    } catch(e) {
+      document.getElementById('agent-list').innerHTML =
+        '<div style="padding:24px;text-align:center;color:#9ca3af">Could not load agents. Make sure backend is running.</div>';
+    }
+  }
+
+  function filterAgents(status) {
+    currentFilter = status;
+    document.querySelectorAll('.da-filter-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('filter-' + status)?.classList.add('active');
+    const filtered = status === 'all' ? allAgents : allAgents.filter(a => a.status === status);
+    renderAgents(filtered);
+  }
+
+  function renderAgents(agents) {
+    document.getElementById('agent-count-tag').textContent = agents.length + ' agents';
+    if (!agents.length) {
+      document.getElementById('agent-list').innerHTML =
+        '<div class="da-empty" style="padding:32px"><div class="da-empty-icon">🔍</div><h3>No agents found</h3><p>Try a different filter.</p></div>';
+      return;
+    }
+    document.getElementById('agent-list').innerHTML = agents.map(a => `
+      <div class="agent-card ${selectedAgentId === a.id ? 'selected' : ''}" onclick="selectAgent('${a.id}')">
+        <div class="agent-avatar">
+          ${initials(a.name)}
+          <div class="agent-status-dot status-${a.status}"></div>
+        </div>
+        <div class="agent-info">
+          <div class="agent-name">${a.name}</div>
+          <div class="agent-meta">
+            <span>📍 ${a.city} · ${a.zone}</span>
+            <span>🚗 ${a.vehicle}</span>
+          </div>
+          <div style="margin-top:5px">${statusLabel(a.status)}</div>
+        </div>
+        <div class="agent-right">
+          <div class="agent-deliveries-count">${a.today_deliveries}</div>
+          <div class="agent-deliveries-lbl">today</div>
+          <div style="font-size:0.75rem;color:#f59e0b;margin-top:4px">⭐ ${a.rating}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Select Agent Detail ─────────────────────────────────────────────────
+  function selectAgent(id) {
+    selectedAgentId = id;
+    filterAgents(currentFilter); // re-render list with highlight
+    const a = allAgents.find(x => x.id === id);
+    if (!a) return;
+
+    const progressPct = Math.min((a.today_deliveries / 15) * 100, 100);
+
+    document.getElementById('agent-detail').innerHTML = `
+      <div class="agent-detail-card">
+        <div class="agent-detail-hero">
+          <div class="agent-detail-top">
+            <div class="agent-big-avatar">${initials(a.name)}</div>
+            <div>
+              <div class="agent-detail-name">${a.name} ${a.is_eco_certified ? '<span style="font-size:0.75rem;background:rgba(34,197,94,0.2);border-radius:99px;padding:3px 10px;color:#86efac;margin-left:8px;font-weight:700">✅ Eco Certified</span>' : ''}</div>
+              <div class="agent-detail-sub">
+                <span>📞 ${a.phone}</span>
+                <span>📅 Since ${new Date(a.joined).toLocaleDateString('en-IN', {month:'short', year:'numeric'})}</span>
+                <span class="rating-stars">${stars(a.rating)}</span>
+                <span style="color:#fbbf24;font-weight:700">${a.rating}/5</span>
+              </div>
+              <div style="margin-top:8px">${statusLabel(a.status)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="agent-body">
+
+          <!-- Info Grid -->
+          <div class="info-grid">
+            <div class="info-cell">
+              <div class="info-cell-icon">🚚</div>
+              <div class="info-cell-val">${a.total_deliveries}</div>
+              <div class="info-cell-lbl">Total Deliveries</div>
+            </div>
+            <div class="info-cell">
+              <div class="info-cell-icon">📦</div>
+              <div class="info-cell-val">${a.today_deliveries}</div>
+              <div class="info-cell-lbl">Today's Trips</div>
+            </div>
+            <div class="info-cell">
+              <div class="info-cell-icon">💰</div>
+              <div class="info-cell-val">₹${a.today_earnings.toLocaleString('en-IN')}</div>
+              <div class="info-cell-lbl">Today's Earnings</div>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="location-strip">
+            <div class="loc-map-pin">📍</div>
+            <div>
+              <div class="loc-main">${a.zone}, ${a.city}</div>
+              <div class="loc-sub">Current operational zone · Live GPS tracking active</div>
+            </div>
+            <div class="loc-coords">
+              <div class="loc-coords-val">${a.lat.toFixed(4)}° N</div>
+              <div class="loc-coords-val">${a.lng.toFixed(4)}° E</div>
+              <div class="loc-coords-lbl">Coordinates</div>
+            </div>
+          </div>
+
+          <!-- Vehicle -->
+          <div class="vehicle-row">
+            <div class="vehicle-icon">${vehicleIcon(a.vehicle)}</div>
+            <div>
+              <div class="vehicle-name">${a.vehicle}</div>
+              <div class="vehicle-num">${a.vehicle_number}</div>
+            </div>
+            ${a.is_eco_certified
+              ? '<div class="eco-badge">🌿 Eco Certified Vehicle</div>'
+              : '<div style="margin-left:auto;font-size:0.74rem;color:#9ca3af">Standard</div>'}
+          </div>
+
+          <!-- Today's Progress -->
+          <div class="today-progress">
+            <div class="today-row">
+              <span class="today-lbl">Daily Target Progress</span>
+              <span class="today-val">${a.today_deliveries} / 15 trips</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width:${progressPct}%"></div>
+            </div>
+            <div class="progress-note">
+              ${progressPct >= 100 ? '🎉 Daily target achieved! Bonus unlocked.' : `${15 - a.today_deliveries} more trips to unlock daily bonus`}
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="agent-actions">
+            <button class="btn-da-primary" onclick="callAgent('${a.phone}')">
+              📞 Call Agent
+            </button>
+            <button class="btn-da-outline" onclick="trackAgent('${a.id}')">
+              🗺️ Track Live
+            </button>
+            ${a.status === 'offline'
+              ? `<button class="btn-da-danger" onclick="updateStatus('${a.id}','online')">⚡ Activate</button>`
+              : `<button class="btn-da-danger" onclick="updateStatus('${a.id}','offline')">❌ Go Offline</button>`}
+          </div>
+
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Active Deliveries ───────────────────────────────────────────────────
+  async function loadActiveDeliveries() {
+    try {
+      const r = await fetch(`${API}/active`);
+      const deliveries = await r.json();
+      document.getElementById('live-del-count').textContent = deliveries.length + ' active';
+      if (!deliveries.length) {
+        document.getElementById('active-deliveries-list').innerHTML =
+          '<div class="da-empty" style="padding:24px"><div class="da-empty-icon">✅</div><h3>No active deliveries</h3><p>All quiet right now!</p></div>';
+        return;
+      }
+      document.getElementById('active-deliveries-list').innerHTML = deliveries.map(d => `
+        <div class="active-delivery-card">
+          <div class="adel-header">
+            <div>
+              <div class="adel-id">${d.delivery_id}</div>
+              <div style="font-size:0.75rem;color:var(--clr-text-3);margin-top:2px">
+                Agent: <strong>${allAgents.find(a=>a.id===d.agent_id)?.name || d.agent_id}</strong>
+              </div>
+            </div>
+            ${deliveryStatusPill(d.status)}
+          </div>
+
+          <div class="adel-route">
+            <div class="adel-stop">
+              <div class="adel-stop-dot dot-pickup">▲</div>
+              <div class="adel-stop-info">
+                <div class="adel-stop-label">Pickup · Seller</div>
+                <div class="adel-stop-name">${d.pickup.name}</div>
+                <div class="adel-stop-addr">${d.pickup.address}</div>
+              </div>
+            </div>
+            <div class="adel-stop">
+              <div class="adel-stop-dot dot-dropoff">●</div>
+              <div class="adel-stop-info">
+                <div class="adel-stop-label">Dropoff · Customer</div>
+                <div class="adel-stop-name">${d.dropoff.name}</div>
+                <div class="adel-stop-addr">${d.dropoff.address}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="adel-meta">
+            <div class="adel-meta-chip">⛽ ${d.fuel_type}</div>
+            <div class="adel-meta-chip">📦 ${d.quantity}</div>
+            <div class="adel-meta-chip">🛣️ ${d.distance_km} km</div>
+            <div class="adel-meta-chip">🕐 Started ${new Date(d.started_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+
+          <div class="eta-bar">
+            <div class="eta-left">Estimated Arrival</div>
+            <div class="eta-val">${d.eta_min} min away</div>
+            <div class="eta-right">
+              <div class="eta-dist">Distance Left</div>
+              <div class="eta-dist-val">${d.distance_km} km</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch(e) {
+      document.getElementById('active-deliveries-list').innerHTML =
+        '<div style="padding:16px;color:#9ca3af;text-align:center">Could not load deliveries.</div>';
+    }
+  }
+
+  // ── Actions ─────────────────────────────────────────────────────────────
+  function callAgent(phone) {
+    showToast(`📞 Calling ${phone}…`, 'info');
+    window.location.href = 'tel:' + phone.replace(/\s/g,'');
+  }
+
+  function trackAgent(id) {
+    const a = allAgents.find(x => x.id === id);
+    const url = `https://maps.google.com/?q=${a?.lat},${a?.lng}`;
+    window.open(url, '_blank');
+    showToast('🗺️ Opening live location in Maps…', 'info');
+  }
+
+  async function updateStatus(id, newStatus) {
+    try {
+      const r = await fetch(`${API}/agents/${id}/status`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ status: newStatus })
+      });
+      const updated = await r.json();
+      const idx = allAgents.findIndex(a => a.id === id);
+      if (idx !== -1) allAgents[idx] = updated;
+      filterAgents(currentFilter);
+      selectAgent(id);
+      loadStats();
+      showToast(`Agent status updated to "${newStatus}"`, 'success');
+    } catch(e) {
+      showToast('Failed to update status', 'error');
+    }
+  }
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  function showToast(msg, type = 'info') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  // ── Nav Auth ──────────────────────────────────────────────────────────────
+  function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('open'); }
+  function logout() {
+    localStorage.removeItem('ecofuel_token');
+    localStorage.removeItem('ecofuel_user');
+    window.location.href = 'login.html';
+  }
+  (function initNav() {
+    const u = JSON.parse(localStorage.getItem('ecofuel_user') || 'null');
+    if (u) {
+      document.getElementById('nav-login').style.display = 'none';
+      const nu = document.getElementById('nav-user');
+      nu.style.display = 'flex';
+      document.getElementById('nav-username').textContent = u.name?.split(' ')[0] || '';
+      if (u.role === 'seller') document.getElementById('nav-seller').style.display = '';
+      if (u.role === 'admin')  document.getElementById('nav-admin').style.display  = '';
+    }
+  })();
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  loadStats();
+  loadAgents();
+  loadActiveDeliveries();
+</script>
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>

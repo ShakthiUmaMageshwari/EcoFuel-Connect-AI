@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard &ndash; EcoFuel Connect AI</title>
+  <meta name="description" content="Admin panel for EcoFuel Connect AI platform management.">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/translations.js"></script>
+  <script src="js/i18n.js" defer></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="/images/logo.png" alt="EcoFuel Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover">
+    <span class="brand-text">EcoFuel <span>Connect</span></span>
+  </a>
+  <ul class="navbar-nav">
+    <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+    <li><a href="admin.html" class="active" data-i18n="nav_admin">Admin Panel</a></li>
+    <li><a href="ai-features.html" data-i18n="nav_ai">AI Features</a></li>
+    <li><a href="analytics.html" data-i18n="nav_analytics">Analytics</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <div id="nav-user" style="display:none;align-items:center;gap:10px">
+      <div class="lang-selector">
+        <span class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</span>
+        <span class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">HI</span>
+        <span class="lang-btn" data-lang="te" onclick="setLanguage('te')">TE</span>
+        <span class="lang-btn" data-lang="ta" onclick="setLanguage('ta')">TA</span>
+      </div>
+      <span class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Admin
+      </span>
+      <button class="btn btn-sm btn-danger" onclick="logout()" data-i18n="nav_logout">Logout</button>
+    </div>
+    <button class="mobile-menu-btn" onclick="document.getElementById('mm').classList.toggle('open')" aria-label="Menu">&#9776;</button>
+  </div>
+</nav>
+<div id="mm" class="navbar-mobile">
+  <a href="index.html">Home</a>
+  <a href="admin.html">Admin Panel</a>
+  <a href="ai-features.html">AI Features</a>
+  <a href="analytics.html">Analytics</a>
+</div>
+
+<div class="page-header">
+  <div class="container">
+    <div class="hero-badge" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:12px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Admin Panel
+    </div>
+    <h1 class="section-title">Platform <span class="gradient-text">Administration</span></h1>
+    <p class="section-sub">Monitor users, verify sellers, and track platform health.</p>
+  </div>
+</div>
+
+<div class="container section-sm">
+
+  <!-- Platform Stats Row 1 -->
+  <div class="grid-4 mb-16">
+    <div class="stat-card">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--clr-primary)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="stat-value" id="a-users">&ndash;</div>
+      <div class="stat-label">Total Buyers</div>
+    </div>
+    <div class="stat-card">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--clr-primary)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="stat-value" id="a-sellers">&ndash;</div>
+      <div class="stat-label">Total Sellers</div>
+    </div>
+    <div class="stat-card">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--clr-primary)" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      </div>
+      <div class="stat-value" id="a-products">&ndash;</div>
+      <div class="stat-label">Active Listings</div>
+    </div>
+    <div class="stat-card">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--clr-primary)" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+      </div>
+      <div class="stat-value" id="a-orders">&ndash;</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+  </div>
+
+  <!-- Platform Stats Row 2 -->
+  <div class="grid-4 mb-40">
+    <div class="stat-card">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="stat-value" id="a-pending">&ndash;</div>
+      <div class="stat-label">Pending Orders</div>
+    </div>
+    <div class="stat-card">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="stat-value" id="a-delivered">&ndash;</div>
+      <div class="stat-label">Delivered Orders</div>
+    </div>
+    <div class="stat-card">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="stat-value" style="color:var(--clr-gold)" id="a-unverified">&ndash;</div>
+      <div class="stat-label">Pending Verification</div>
+    </div>
+    <div class="stat-card">
+      <div style="display:flex;justify-content:center;margin-bottom:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="stat-value" style="color:var(--clr-primary)" id="a-verified">&ndash;</div>
+      <div class="stat-label">Verified Sellers</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs mb-24">
+    <button class="tab-btn active" id="tab-sellers" onclick="showTab('sellers')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      Sellers
+    </button>
+    <button class="tab-btn" id="tab-users" onclick="showTab('users')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      Users
+    </button>
+    <button class="tab-btn" id="tab-products" onclick="showTab('products')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+      Products
+    </button>
+  </div>
+
+  <!-- Sellers Table -->
+  <div id="section-sellers">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Business</th>
+            <th>Seller Name</th>
+            <th>City</th>
+            <th>Rating</th>
+            <th>Sales</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="sellers-tbody">
+          <tr><td colspan="7" class="text-center text-muted">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div id="section-users" style="display:none">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>City</th>
+            <th>Role</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  <div id="section-products" style="display:none">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>City</th>
+            <th>Stock</th>
+            <th>Views</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="products-tbody">
+          <tr><td colspan="7" class="text-center text-muted">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="js/api.js"></script>
+<script>
+  const user = getUser();
+  if (!user || user.role !== 'admin') {
+    showToast && showToast('Admin access required', 'error');
+    setTimeout(() => window.location.href = 'login.html', 800);
+  }
+
+  function showTab(tab) {
+    ['sellers','users','products'].forEach(t => {
+      document.getElementById(`section-${t}`).style.display = t === tab ? 'block' : 'none';
+      document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+    });
+  }
+
+  // SVG helpers for table rows
+  function locationIcon() {
+    return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;opacity:0.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+  }
+  function renderStarsSVG(rating) {
+    let s = '';
+    for (let i = 1; i <= 5; i++) {
+      s += `<svg width="12" height="12" viewBox="0 0 24 24" fill="${i <= rating ? '#f59e0b' : 'none'}" stroke="#f59e0b" stroke-width="2" style="vertical-align:-1px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+    }
+    return s;
+  }
+
+  async function loadStats() {
+    try {
+      const s = await api.adminStats();
+      document.getElementById('a-users').textContent = s.total_users;
+      document.getElementById('a-sellers').textContent = s.total_sellers;
+      document.getElementById('a-products').textContent = s.active_products;
+      document.getElementById('a-orders').textContent = s.total_orders;
+      document.getElementById('a-pending').textContent = s.pending_orders;
+      document.getElementById('a-delivered').textContent = s.delivered_orders;
+    } catch(e) { showToast('Stats error: ' + e.message, 'error'); }
+  }
+
+  async function loadSellers() {
+    try {
+      const sellers = await api.adminSellers();
+      const verified = sellers.filter(s => s.verified).length;
+      const unverified = sellers.filter(s => !s.verified).length;
+      document.getElementById('a-verified').textContent = verified;
+      document.getElementById('a-unverified').textContent = unverified;
+
+      document.getElementById('sellers-tbody').innerHTML = sellers.map(s => `
+        <tr>
+          <td>
+            <div class="font-bold">${s.business_name}</div>
+            <div class="text-xs text-muted">${(s.description || '').slice(0,50)}</div>
+          </td>
+          <td>${s.seller_name || '&ndash;'}</td>
+          <td>${locationIcon()} ${s.seller_city || '&ndash;'}</td>
+          <td>${renderStarsSVG(Math.round(s.rating))} <span class="text-muted text-xs">${s.rating}</span></td>
+          <td>${s.total_sales}</td>
+          <td><span class="status-badge ${s.verified ? 'status-delivered' : 'status-pending'}">${s.verified ? 'Verified' : 'Pending'}</span></td>
+          <td>
+            <button class="verify-btn ${s.verified ? 'verified' : ''}" onclick="toggleVerify(${s.id}, ${s.verified})">
+              ${s.verified ? '&#10003; Verified' : 'Verify'}
+            </button>
+          </td>
+        </tr>`).join('') || '<tr><td colspan="7" class="text-center text-muted">No sellers found</td></tr>';
+    } catch(e) { showToast('Error loading sellers: ' + e.message, 'error'); }
+  }
+
+  async function loadUsers() {
+    try {
+      const users = await api.adminUsers();
+      const buyers = users.filter(u => u.role === 'buyer');
+      document.getElementById('users-tbody').innerHTML = buyers.map(u => `
+        <tr>
+          <td><div class="font-bold">${u.name}</div></td>
+          <td class="text-muted text-sm">${u.email}</td>
+          <td>${locationIcon()} ${u.city || '&ndash;'}</td>
+          <td><span class="status-badge ${u.role==='admin' ? 'status-delivered' : u.role==='seller' ? 'status-confirmed' : 'status-pending'}">${u.role}</span></td>
+          <td class="text-muted text-xs">${new Date(u.created_at).toLocaleDateString('en-IN')}</td>
+        </tr>`).join('') || '<tr><td colspan="5" class="text-center text-muted">No users found</td></tr>';
+    } catch(e) { showToast('Error loading users: ' + e.message, 'error'); }
+  }
+
+  async function loadProducts() {
+    try {
+      const prods = await api.adminProducts();
+      document.getElementById('products-tbody').innerHTML = prods.slice(0,30).map(p => `
+        <tr>
+          <td><div class="font-bold text-sm">${p.name}</div></td>
+          <td>${renderFuelBadge(p.fuel_type)}</td>
+          <td class="font-bold text-green">${formatINR(p.price)}/${p.unit}</td>
+          <td>${locationIcon()} ${p.city}</td>
+          <td>${p.quantity_available} ${p.unit}</td>
+          <td>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="vertical-align:-1px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            ${p.views}
+          </td>
+          <td><span class="status-badge ${p.is_active ? 'status-delivered' : 'status-cancelled'}">${p.is_active ? 'Active' : 'Disabled'}</span></td>
+        </tr>`).join('') || '<tr><td colspan="7" class="text-center text-muted">No products found</td></tr>';
+    } catch(e) { showToast('Error loading products: ' + e.message, 'error'); }
+  }
+
+  async function toggleVerify(sellerId, currentStatus) {
+    try {
+      await api.verifySeller(sellerId, !currentStatus);
+      showToast(`Seller ${!currentStatus ? 'verified' : 'unverified'} successfully`, 'success');
+      loadSellers();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  loadStats();
+  loadSellers();
+  loadUsers();
+  loadProducts();
+</script>
+</body>
+</html>

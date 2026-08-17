@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details — EcoFuel Connect AI</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/translations.js"></script>
+  <script src="js/i18n.js" defer></script>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand">
+    <img src="/images/logo.png" alt="EcoFuel Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover">
+    <span class="brand-text">EcoFuel <span>Connect</span></span>
+  </a>
+  <ul class="navbar-nav">
+    <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+    <li><a href="explore.html" data-i18n="nav_explore">Explore Fuels</a></li>
+    <li><a href="ai-features.html" data-i18n="nav_ai">AI Features</a></li>
+    <li><a href="analytics.html" data-i18n="nav_analytics">Analytics</a></li>
+    <li><a href="delivery-agent.html">🚴 Delivery</a></li>
+    <li id="nav-seller" style="display:none"><a href="seller-dashboard.html">Seller</a></li>
+    <li id="nav-admin" style="display:none"><a href="admin.html">Admin</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <div class="lang-selector">
+      <span class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</span>
+      <span class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">HI</span>
+      <span class="lang-btn" data-lang="te" onclick="setLanguage('te')">TE</span>
+      <span class="lang-btn" data-lang="ta" onclick="setLanguage('ta')">TA</span>
+    </div>
+    <a id="nav-login" href="login.html" class="btn btn-outline btn-sm" data-i18n="nav_login">Login</a>
+    <div id="nav-user" style="display:none;align-items:center;gap:10px">
+      <a href="user-dashboard.html" class="btn btn-ghost btn-sm">👤 <span id="nav-username"></span></a>
+      <button class="btn btn-sm btn-danger" onclick="logout()" data-i18n="nav_logout">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div style="padding-top:88px" class="container">
+  <div style="padding:16px 0">
+    <a href="explore.html" class="btn btn-ghost btn-sm">← Back to Explore</a>
+  </div>
+  <div id="product-detail" class="flex-center" style="padding:60px"><div class="spinner"></div></div>
+</div>
+
+<!-- Order Modal -->
+<div id="order-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="flex-between mb-24">
+      <h2 class="font-head" style="font-size:1.3rem">Place Order</h2>
+      <button onclick="document.getElementById('order-modal').classList.remove('open')" style="background:none;border:none;color:var(--clr-text-2);font-size:1.4rem;cursor:pointer">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantity (<span id="modal-unit">unit</span>)</label>
+      <div class="quantity-input">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <span class="qty-display" id="modal-qty">1</span>
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Delivery Type</label>
+      <select id="modal-delivery" class="form-control">
+        <option value="delivery">🚚 Home Delivery</option>
+        <option value="pickup">🏭 Pickup from Seller</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Delivery Address</label>
+      <input type="text" id="modal-address" class="form-control" placeholder="Enter your full address">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea id="modal-notes" class="form-control" rows="2" placeholder="Special instructions..."></textarea>
+    </div>
+    <div class="savings-card mb-16">
+      <div class="savings-row">
+        <span class="text-muted text-sm">Total Amount</span>
+        <span class="price-tag" id="modal-total">₹0</span>
+      </div>
+      <div class="savings-row">
+        <span class="text-muted text-sm">vs Petrol Cost</span>
+        <span id="modal-vs-petrol" class="text-green font-bold">Calculating...</span>
+      </div>
+    </div>
+    <button class="btn btn-primary w-full btn-lg" id="confirm-order-btn" onclick="confirmOrder()">Confirm Order</button>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="js/api.js"></script>
+<script>
+  let currentProduct = null;
+  let orderQty = 1;
+
+  async function loadProduct() {
+    const id = new URLSearchParams(window.location.search).get('id');
+    if (!id) { window.location.href = 'explore.html'; return; }
+
+    try {
+      const p = await api.getProduct(id);
+      currentProduct = p;
+      document.title = `${p.name} — EcoFuel Connect AI`;
+      renderProduct(p);
+    } catch (e) {
+      document.getElementById('product-detail').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Product not found</h3><p>${e.message}</p></div>`;
+    }
+  }
+
+  function renderProduct(p) {
+    const imgSrc = { biogas:'/images/biogas.png', 'bio-cng':'/images/bio-cng.png', biofuel:'/images/biofuel.png', biomass:'/images/biomass.png' }[p.fuel_type] || '/images/biogas.png';
+    const html = `
+      <div class="product-detail-layout" style="margin-bottom:60px">
+        <div>
+          <div class="product-hero-img" style="font-size:unset">
+            <img src="${imgSrc}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;padding:24px">
+          </div>
+          <div class="mt-24">
+            <div class="flex gap-8 mb-16" style="flex-wrap:wrap">
+              ${renderFuelBadge(p.fuel_type)}
+              <span class="tag">📍 ${p.city}</span>
+              <span class="tag">🎯 ${p.use_case}</span>
+              ${p.seller_verified ? '<span class="tag" style="color:var(--clr-primary);border-color:rgba(22,163,74,0.3)">✓ Verified Seller</span>' : ''}
+            </div>
+            <h1 class="font-head" style="font-size:2rem;font-weight:800">${p.name}</h1>
+            <p class="text-muted mt-16" style="line-height:1.8;font-size:1rem">${p.description}</p>
+
+            <div class="ai-insight mt-24">
+              <span class="ai-icon">🤖</span>
+              <div>
+                <div class="ai-text font-bold mb-4">AI Insight</div>
+                <div class="ai-text" id="ai-insight-text">Calculating savings...</div>
+              </div>
+            </div>
+
+            <div class="savings-card mt-24">
+              <h3 class="font-head" style="font-size:1rem;margin-bottom:16px">💚 Savings vs Fossil Fuels</h3>
+              <div class="savings-row"><span class="text-muted text-sm">This fuel price</span><span class="font-bold">${formatINR(p.price)}/${p.unit}</span></div>
+              <div class="savings-row"><span class="text-muted text-sm">Petrol equivalent</span><span class="text-muted">₹106.00/L</span></div>
+              <div class="savings-row"><span class="text-muted text-sm">You save per unit</span><span class="text-green font-bold">₹${Math.max(0,106-p.price).toFixed(2)}</span></div>
+              <div class="savings-row"><span class="text-muted text-sm">CO₂ reduction</span><span class="text-accent font-bold">~60% less</span></div>
+            </div>
+
+            <div class="mt-24">
+              <h3 class="font-head" style="font-size:1rem;margin-bottom:16px">🏭 Seller Info</h3>
+              <div class="card" style="display:flex;align-items:center;gap:16px;padding:20px">
+                <div style="width:48px;height:48px;border-radius:12px;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;font-weight:800">${(p.seller_name || 'S')[0]}</div>
+                <div>
+                  <div class="font-bold">${p.seller_name}</div>
+                  <div class="text-sm text-muted">${p.city} • ${p.review_count} reviews • ⭐ ${p.avg_rating}</div>
+                </div>
+              </div>
+            </div>
+
+            ${p.reviews && p.reviews.length > 0 ? `
+            <div class="mt-24">
+              <h3 class="font-head" style="font-size:1rem;margin-bottom:16px">⭐ Customer Reviews</h3>
+              ${p.reviews.slice(0,4).map(r => `
+                <div class="card mb-12" style="padding:16px">
+                  <div class="flex-between mb-8">
+                    <span class="font-bold text-sm">${r.reviewer_name}</span>
+                    <span>${renderStars(r.rating)}</span>
+                  </div>
+                  <p class="text-sm text-muted">${r.comment || ''}</p>
+                </div>`).join('')}
+            </div>` : ''}
+          </div>
+        </div>
+
+        <div>
+          <div class="order-card">
+            <div class="flex-between mb-16">
+              <div><span class="price-tag" style="font-size:2rem">${formatINR(p.price)}</span><span class="price-unit">/${p.unit}</span></div>
+              ${renderFuelBadge(p.fuel_type)}
+            </div>
+            <div class="divider"></div>
+            <div class="flex-between mb-16">
+              <span class="text-muted text-sm">Available Stock</span>
+              <span class="font-bold">${p.quantity_available} ${p.unit}</span>
+            </div>
+            <div class="flex-between mb-24">
+              <span class="text-muted text-sm">Views</span>
+              <span class="font-bold">👁 ${p.views}</span>
+            </div>
+
+            <label class="form-label">Quantity</label>
+            <div class="quantity-input mb-16">
+              <button class="qty-btn" id="qty-minus" onclick="changeDetailQty(-1)">−</button>
+              <span class="qty-display" id="detail-qty">1</span>
+              <button class="qty-btn" id="qty-plus" onclick="changeDetailQty(1)">+</button>
+            </div>
+
+            <div class="savings-card mb-20">
+              <div class="savings-row">
+                <span class="text-sm text-muted">Total Cost</span>
+                <span class="price-tag" id="detail-total">${formatINR(p.price)}</span>
+              </div>
+              <div class="savings-row">
+                <span class="text-sm text-muted">You Save vs Petrol</span>
+                <span class="text-green font-bold" id="detail-saving">₹${Math.max(0,106-p.price).toFixed(0)}</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary w-full btn-lg" onclick="openOrderModal()">🛒 Order Now</button>
+            <a href="explore.html" class="btn btn-ghost w-full mt-8">← Browse More</a>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('product-detail').innerHTML = html;
+    loadAISavings(p.id, 1);
+  }
+
+  async function loadAISavings(productId, qty) {
+    try {
+      const data = await api.savings(productId, qty);
+      const el = document.getElementById('ai-insight-text');
+      if (el) el.textContent = data.summary;
+    } catch(e) {}
+  }
+
+  let detailQty = 1;
+  function changeDetailQty(delta) {
+    if (!currentProduct) return;
+    detailQty = Math.max(1, Math.min(detailQty + delta, currentProduct.quantity_available));
+    document.getElementById('detail-qty').textContent = detailQty;
+    document.getElementById('detail-total').textContent = formatINR(currentProduct.price * detailQty);
+    document.getElementById('detail-saving').textContent = `₹${(Math.max(0,106 - currentProduct.price) * detailQty).toFixed(0)}`;
+    orderQty = detailQty;
+  }
+
+  function changeQty(delta) {
+    if (!currentProduct) return;
+    orderQty = Math.max(1, Math.min(orderQty + delta, currentProduct.quantity_available));
+    document.getElementById('modal-qty').textContent = orderQty;
+    updateModalTotal();
+  }
+
+  function updateModalTotal() {
+    if (!currentProduct) return;
+    document.getElementById('modal-total').textContent = formatINR(currentProduct.price * orderQty);
+    document.getElementById('modal-vs-petrol').textContent = `Save ₹${(Math.max(0,106 - currentProduct.price) * orderQty).toFixed(0)}`;
+  }
+
+  function openOrderModal() {
+    const user = getUser();
+    if (!user) { showToast('Please login to place an order', 'info'); setTimeout(() => window.location.href = 'login.html', 1200); return; }
+    if (!currentProduct) return;
+    orderQty = detailQty || 1;
+    document.getElementById('modal-qty').textContent = orderQty;
+    document.getElementById('modal-unit').textContent = currentProduct.unit;
+    document.getElementById('modal-address').value = user.city || '';
+    updateModalTotal();
+    document.getElementById('order-modal').classList.add('open');
+  }
+
+  async function confirmOrder() {
+    const btn = document.getElementById('confirm-order-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Placing Order...';
+    try {
+      await api.placeOrder({
+        product_id: currentProduct.id,
+        quantity: orderQty,
+        delivery_type: document.getElementById('modal-delivery').value,
+        delivery_address: document.getElementById('modal-address').value,
+        notes: document.getElementById('modal-notes').value
+      });
+      document.getElementById('order-modal').classList.remove('open');
+      showToast('🎉 Order placed successfully!', 'success');
+      setTimeout(() => window.location.href = 'user-dashboard.html', 1800);
+    } catch (e) {
+      showToast(e.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = 'Confirm Order';
+    }
+  }
+
+  loadProduct();
+</script>
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>

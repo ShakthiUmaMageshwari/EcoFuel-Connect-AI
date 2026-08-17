@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard — EcoFuel Connect AI</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/translations.js"></script>
+  <script src="js/i18n.js" defer></script>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand"><img src="/images/logo.png" alt="EcoFuel Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover"><span class="brand-text">EcoFuel <span>Connect</span></span></a>
+  <ul class="navbar-nav">
+    <li><a href="index.html" data-i18n="nav_home">Home</a></li><li><a href="explore.html" data-i18n="nav_explore">Explore Fuels</a></li>
+    <li><a href="ai-features.html" data-i18n="nav_ai">AI Features</a></li>
+    <li><a href="analytics.html" data-i18n="nav_analytics">Analytics</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <div id="nav-user" style="display:none;align-items:center;gap:10px">
+      <div class="lang-selector">
+        <span class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</span>
+        <span class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">HI</span>
+        <span class="lang-btn" data-lang="te" onclick="setLanguage('te')">TE</span>
+        <span class="lang-btn" data-lang="ta" onclick="setLanguage('ta')">TA</span>
+      </div>
+      <a href="user-dashboard.html" class="btn btn-ghost btn-sm">👤 <span id="nav-username"></span></a>
+      <button class="btn btn-sm btn-danger" onclick="logout()" data-i18n="nav_logout">Logout</button>
+    </div>
+    <a id="nav-login" href="login.html" class="btn btn-outline btn-sm" data-i18n="nav_login">Login</a>
+  </div>
+</nav>
+<div class="page-header">
+  <div class="container">
+    <div class="hero-badge" style="display:inline-flex;margin-bottom:12px">👤 My Account</div>
+    <h1 class="section-title">Welcome, <span class="gradient-text" id="user-name">User</span>!</h1>
+    <p class="section-sub">Track your orders, savings, and personalized fuel recommendations.</p>
+  </div>
+</div>
+<div class="container section-sm">
+  <!-- Stats Row -->
+  <div class="grid-4 mb-40">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-orders">0</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-delivered">0</div>
+      <div class="stat-label">Delivered</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-money-saved">₹0</div>
+      <div class="stat-label">Money Saved vs Petrol</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-co2">0 kg</div>
+      <div class="stat-label">CO₂ Reduced</div>
+    </div>
+  </div>
+  <div class="tabs mb-24">
+    <button class="tab-btn active" id="tab-orders" onclick="showSection('orders')">📦 My Orders</button>
+    <button class="tab-btn" id="tab-recs" onclick="showSection('recs')">🤖 AI Recommendations</button>
+  </div>
+  <!-- Orders Section -->
+  <div id="section-orders">
+    <div id="orders-list">
+      <div class="flex-center" style="padding:60px"><div class="spinner"></div></div>
+    </div>
+  </div>
+  <!-- AI Recommendations Section -->
+  <div id="section-recs" style="display:none">
+    <div class="ai-insight mb-24">
+      <span class="ai-icon">🤖</span>
+      <div class="ai-text">Based on your order history and location, here are personalized fuel recommendations for you.</div>
+    </div>
+    <div id="recs-grid" class="grid-auto">
+      <div class="flex-center" style="grid-column:1/-1;padding:60px"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Delivery Tracking Modal -->
+<div id="track-modal" class="modal-overlay">
+  <div class="modal" style="max-width:460px">
+    <div class="flex-between mb-20">
+      <h2 class="font-head" style="font-size:1.2rem;display:flex;align-items:center;gap:10px">
+        <span style="background:var(--grad-primary);color:#fff;border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1rem">🗺️</span>
+        Track Your Order
+      </h2>
+      <button onclick="document.getElementById('track-modal').classList.remove('open')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--clr-text-2)">✕</button>
+    </div>
+    <div id="track-modal-body"></div>
+    <div style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #bbf7d0;border-left:4px solid var(--clr-primary);border-radius:var(--radius);padding:12px 16px;margin-top:16px">
+      <div style="font-size:0.82rem;font-weight:700;color:var(--clr-primary-dark);margin-bottom:4px">👋 EcoFuel Delivery Promise</div>
+      <div style="font-size:0.78rem;color:#166534">Eco-certified delivery partners handle your fuel with care. Avg delivery time: <strong>22 min</strong>.</div>
+    </div>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script>
+  const user = getUser();
+  if (!user) { window.location.href = 'login.html'; }
+  function showSection(sec) {
+    ['orders','recs'].forEach(s => {
+      document.getElementById(`section-${s}`).style.display = s === sec ? 'block' : 'none';
+      document.getElementById(`tab-${s}`).classList.toggle('active', s === sec);
+    });
+  }
+  async function loadOrders() {
+    try {
+      const orders = await api.buyerOrders();
+      document.getElementById('stat-orders').textContent = orders.length;
+      const delivered = orders.filter(o => o.status === 'delivered');
+      document.getElementById('stat-delivered').textContent = delivered.length;
+      let totalSaved = 0, totalCo2 = 0;
+      delivered.forEach(o => {
+        totalSaved += Math.max(0, (106 - (o.total_price / o.quantity))) * o.quantity;
+        totalCo2 += o.quantity * 0.7;
+      });
+      document.getElementById('stat-money-saved').textContent = '₹' + Math.round(totalSaved).toLocaleString('en-IN');
+      document.getElementById('stat-co2').textContent = Math.round(totalCo2) + ' kg';
+      const container = document.getElementById('orders-list');
+      if (orders.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><h3>No orders yet</h3><p class="text-muted">Start by exploring fuels near you</p><a href="explore.html" class="btn btn-primary mt-16">Explore Fuels →</a></div>`;
+        return;
+      }
+      container.innerHTML = orders.map(o => `
+        <div class="card mb-16 flex-between" style="gap:16px;flex-wrap:wrap">
+          <div class="flex gap-16 align-items:center" style="align-items:center;gap:16px">
+            <div style="font-size:2rem">${getFuelIcon(o.fuel_type)}</div>
+            <div>
+              <div class="font-bold">${o.product_name}</div>
+              <div class="text-sm text-muted">Qty: ${o.quantity} • ${formatINR(o.total_price)} • ${o.delivery_type === 'delivery' ? '🚚 Delivery' : '🏠 Pickup'}</div>
+              <div class="text-xs text-muted mt-4">${new Date(o.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}</div>
+            </div>
+          </div>
+          <div class="flex gap-8 align-items:center" style="align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="status-badge status-${o.status}">${o.status}</span>
+            ${o.delivery_type === 'delivery' && o.status !== 'cancelled' ? `<button class="btn btn-outline btn-sm" onclick="openTracking(${JSON.stringify(o).replace(/"/g,'&quot;')})">🗺️ Track</button>` : ''}
+            <a href="product.html?id=${o.product_id}" class="btn btn-ghost btn-sm">View</a>
+            ${o.status === 'pending' ? `<button class="btn btn-danger btn-sm" onclick="cancelOrder(${o.id})">Cancel</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    } catch(e) {
+      showToast('Could not load orders: ' + e.message, 'error');
+    }
+  }
+  async function cancelOrder(id) {
+    try {
+      await api.updateOrderStatus(id, 'cancelled');
+      showToast('Order cancelled', 'info');
+      loadOrders();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+  async function loadRecs() {
+    const grid = document.getElementById('recs-grid');
+    try {
+      const recs = await api.recommend({ city: user.city, budget: 120 });
+      grid.innerHTML = recs.slice(0,6).map(r => renderProductCard(r.product)).join('');
+    } catch(e) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🤖</div><h3>Recommendations unavailable</h3></div>'; }
+  }
+  if (user) {
+    document.getElementById('user-name').textContent = user.name.split(' ')[0];
+  }
+  loadOrders();
+  loadRecs();
+
+  /* ── Order Tracking Modal ── */
+  function openTracking(order) {
+    const steps = [
+      { key: 'pending',   icon: '🛒', label: 'Order Placed',       desc: 'Your order has been received.' },
+      { key: 'confirmed', icon: '✅', label: 'Order Confirmed',     desc: 'Seller has confirmed your order.' },
+      { key: 'on_the_way', icon: '🚴', label: 'Out for Delivery',   desc: 'EcoFuel delivery partner is on the way.' },
+      { key: 'delivered', icon: '📦', label: 'Delivered',           desc: 'Your fuel has been delivered!' },
+    ];
+    const STATUS_MAP = { pending: 0, confirmed: 1, on_the_way: 2, delivered: 3 };
+    const currentStep = STATUS_MAP[order.status] ?? (order.status === 'cancelled' ? -1 : 0);
+
+    const stepsHtml = steps.map((s, i) => {
+      const done = i <= currentStep;
+      const active = i === currentStep;
+      return `
+        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:${i < steps.length-1 ? '0' : '0'}">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;
+              background:${done ? 'var(--grad-primary)' : '#f3f4f6'};
+              box-shadow:${active ? 'var(--shadow-green)' : 'none'};
+              border:2px solid ${done ? 'var(--clr-primary)' : 'var(--clr-border)'}">
+              ${s.icon}
+            </div>
+            ${i < steps.length-1 ? `<div style="width:2px;height:36px;background:${done && currentStep > i ? 'var(--clr-primary)' : 'var(--clr-border)'};margin:4px 0"></div>` : ''}
+          </div>
+          <div style="padding-top:8px">
+            <div style="font-weight:700;font-size:0.9rem;color:${done ? 'var(--clr-text)' : 'var(--clr-text-3)'}">${s.label}</div>
+            <div style="font-size:0.78rem;color:var(--clr-text-2);margin-top:2px">${s.desc}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const cancelled = order.status === 'cancelled';
+    document.getElementById('track-modal-body').innerHTML = `
+      <div style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="font-size:2rem">${getFuelIcon(order.fuel_type)}</div>
+          <div>
+            <div style="font-weight:800;font-size:1rem">${order.product_name}</div>
+            <div style="font-size:0.8rem;color:var(--clr-text-2)">Order #${order.id} · ${formatINR(order.total_price)} · Qty: ${order.quantity}</div>
+            <div style="font-size:0.8rem;color:var(--clr-text-2);margin-top:2px">📍 ${order.delivery_address || 'Your city'}</div>
+          </div>
+        </div>
+        ${cancelled ? `<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:var(--radius);padding:12px 16px;color:#991b1b;font-weight:700">❌ This order was cancelled.</div>` : stepsHtml}
+      </div>`;
+    document.getElementById('track-modal').classList.add('open');
+  }
+  document.getElementById('track-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('track-modal')) document.getElementById('track-modal').classList.remove('open');
+  });
+</script>
+<script src="js/chatbot-widget.js"></script>
+</body>
+</html>

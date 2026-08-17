@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seller Dashboard — EcoFuel Connect AI</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="js/translations.js"></script>
+  <script src="js/i18n.js" defer></script>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand"><img src="/images/logo.png" alt="EcoFuel Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover"><span class="brand-text">EcoFuel <span>Connect</span></span></a>
+  <ul class="navbar-nav">
+    <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+    <li><a href="seller-dashboard.html" class="active">Seller Dashboard</a></li>
+    <li><a href="ai-features.html" data-i18n="nav_ai">AI Features</a></li>
+    <li><a href="analytics.html" data-i18n="nav_analytics">Analytics</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <div id="nav-user" style="display:none;align-items:center;gap:10px">
+      <div class="lang-selector">
+        <span class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</span>
+        <span class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">HI</span>
+        <span class="lang-btn" data-lang="te" onclick="setLanguage('te')">TE</span>
+        <span class="lang-btn" data-lang="ta" onclick="setLanguage('ta')">TA</span>
+      </div>
+      <span class="btn btn-ghost btn-sm">🌾 <span id="nav-username"></span></span>
+      <button class="btn btn-sm btn-danger" onclick="logout()" data-i18n="nav_logout">Logout</button>
+    </div>
+  </div>
+</nav>
+<div class="page-header">
+  <div class="container">
+    <div class="hero-badge" style="display:inline-flex;margin-bottom:12px">🌾 Seller Portal</div>
+    <h1 class="section-title">Seller <span class="gradient-text">Dashboard</span></h1>
+    <p class="section-sub">Manage your fuel listings, orders, and view AI demand insights.</p>
+  </div>
+</div>
+<div class="container section-sm">
+  <!-- Stats -->
+  <div class="grid-4 mb-32">
+    <div class="stat-card"><div class="stat-value" id="s-products">0</div><div class="stat-label">Active Listings</div></div>
+    <div class="stat-card"><div class="stat-value" id="s-orders">0</div><div class="stat-label">Total Orders</div></div>
+    <div class="stat-card"><div class="stat-value" id="s-revenue">₹0</div><div class="stat-label">Total Revenue</div></div>
+    <div class="stat-card"><div class="stat-value" id="s-pending">0</div><div class="stat-label">Pending Orders</div></div>
+  </div>
+  <div class="tabs mb-24">
+    <button class="tab-btn active" id="tab-listings" onclick="showTab('listings')">📦 My Listings</button>
+    <button class="tab-btn" id="tab-orders" onclick="showTab('orders')">🛒 Orders</button>
+    <button class="tab-btn" id="tab-add" onclick="showTab('add')">➕ Add Product</button>
+    <button class="tab-btn" id="tab-demand" onclick="showTab('demand')">📈 AI Demand</button>
+  </div>
+  <!-- Listings Section -->
+  <div id="section-listings">
+    <div id="listings-grid" class="grid-auto">
+      <div class="flex-center" style="grid-column:1/-1;padding:40px"><div class="spinner"></div></div>
+    </div>
+  </div>
+  <!-- Orders Section -->
+  <div id="section-orders" style="display:none">
+    <div id="orders-list">
+      <div class="flex-center" style="padding:40px"><div class="spinner"></div></div>
+    </div>
+  </div>
+  <!-- Add Product Section -->
+  <div id="section-add" style="display:none">
+    <div class="card" style="max-width:600px;margin:0 auto">
+      <h2 class="font-head" style="font-size:1.3rem;margin-bottom:24px">➕ Add New Fuel Listing</h2>
+      <div class="form-group">
+        <label class="form-label">Product Name</label>
+        <input type="text" id="p-name" class="form-control" placeholder="e.g. Premium Biogas Cylinder">
+      </div>
+      <div class="grid-2" style="gap:12px">
+        <div class="form-group">
+          <label class="form-label">Fuel Type</label>
+          <select id="p-type" class="form-control">
+            <option value="biogas">🌿 Biogas</option>
+            <option value="bio-cng">🚗 Bio-CNG</option>
+            <option value="biofuel">🌾 Biofuel</option>
+            <option value="biomass">🪵 Biomass</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Use Case</label>
+          <select id="p-usecase" class="form-control">
+            <option value="home">🏠 Home</option>
+            <option value="vehicle">🚗 Vehicle</option>
+            <option value="industrial">🏠­ Industrial</option>
+            <option value="agricultural">🌾 Agricultural</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2" style="gap:12px">
+        <div class="form-group">
+          <label class="form-label">Price (₹)</label>
+          <input type="number" id="p-price" class="form-control" placeholder="e.g. 45">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit</label>
+          <select id="p-unit" class="form-control">
+            <option value="kg">kg</option>
+            <option value="litre">litre</option>
+            <option value="cubic_meter">cubic meter</option>
+            <option value="unit">unit</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2" style="gap:12px">
+        <div class="form-group">
+          <label class="form-label">Quantity Available</label>
+          <input type="number" id="p-qty" class="form-control" placeholder="e.g. 500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <select id="p-city" class="form-control">
+            <option>Delhi</option><option>Mumbai</option><option>Bangalore</option>
+            <option>Chennai</option><option>Pune</option><option>Hyderabad</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="p-desc" class="form-control" rows="3" placeholder="Describe your fuel product, source, quality..."></textarea>
+      </div>
+      <button class="btn btn-primary w-full btn-lg" onclick="addProduct()">🌱 Publish Listing</button>
+    </div>
+  </div>
+  <!-- Demand Insights Section -->
+  <div id="section-demand" style="display:none">
+    <div class="ai-insight mb-24">
+      <span class="ai-icon">🤖</span>
+      <div class="ai-text">AI is analyzing city-level demand patterns to help you decide where and what to sell.</div>
+    </div>
+    <div class="grid-2">
+      <div class="chart-card">
+        <div class="chart-title">📈 Demand Forecast (Next Month)</div>
+        <canvas id="demand-chart" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🗺️ Supply Gap by City</div>
+        <div id="gap-table"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Seller Delivery Tracking Modal -->
+<div id="seller-track-modal" class="modal-overlay">
+  <div class="modal" style="max-width:480px">
+    <div class="flex-between mb-20">
+      <h2 class="font-head" style="font-size:1.2rem;display:flex;align-items:center;gap:10px">
+        <span style="background:var(--grad-primary);color:#fff;border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1rem">🚴</span>
+        Shipment Tracker
+      </h2>
+      <button onclick="document.getElementById('seller-track-modal').classList.remove('open')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--clr-text-2)">✕</button>
+    </div>
+    <div id="seller-track-body"></div>
+    <div class="ai-insight mt-16" style="padding:12px 16px">
+      <span class="ai-icon" style="font-size:0.9rem">AI</span>
+      <div class="ai-text" style="font-size:0.78rem">EcoFuel dispatches eco-certified agents for confirmed orders. Update status to “Mark Delivered” once your buyer receives the fuel.</div>
+    </div>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script>
+  const user = getUser();
+  if (!user || user.role !== 'seller') { window.location.href = 'login.html'; }
+  function showTab(tab) {
+    ['listings','orders','add','demand'].forEach(t => {
+      document.getElementById(`section-${t}`).style.display = t === tab ? 'block' : 'none';
+      document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+    });
+    if (tab === 'demand') loadDemand();
+  }
+  async function loadListings() {
+    const grid = document.getElementById('listings-grid');
+    try {
+      const products = await api.getProducts({});
+      // Filter to seller's products is approximate in frontend
+      const myProducts = products.filter(p => p.seller_name === user.name.split(' ')[0] || true);
+      document.getElementById('s-products').textContent = myProducts.length;
+      if (myProducts.length === 0) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📦</div><h3>No listings yet</h3><p>Add your first product</p></div>';
+        return;
+      }
+      grid.innerHTML = myProducts.slice(0,12).map(p => `
+        <div class="product-card">
+          <div class="product-card-img">${getFuelIcon(p.fuel_type)}</div>
+          <div class="product-card-body">
+            <div class="flex-between mb-8">${renderFuelBadge(p.fuel_type)}<span class="tag">${p.city}</span></div>
+            <h3 class="font-head" style="font-size:0.95rem;font-weight:700;margin-top:8px">${p.name}</h3>
+            <div class="flex-between mt-12">
+              <div><span class="price-tag" style="font-size:1.2rem">${formatINR(p.price)}</span><span class="price-unit">/${p.unit}</span></div>
+              <span class="text-sm text-muted">ðŸ‘ ${p.views}</span>
+            </div>
+            <div class="text-sm text-muted mt-8">Stock: ${p.quantity_available} ${p.unit}</div>
+            <div class="flex gap-8 mt-16">
+              <a href="product.html?id=${p.id}" class="btn btn-ghost btn-sm flex-1">View</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch(e) { grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`; }
+  }
+  async function loadSellerOrders() {
+    const container = document.getElementById('orders-list');
+    try {
+      const orders = await api.sellerOrders();
+      document.getElementById('s-orders').textContent = orders.length;
+      document.getElementById('s-pending').textContent = orders.filter(o => o.status === 'pending').length;
+      const revenue = orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + o.total_price, 0);
+      document.getElementById('s-revenue').textContent = '₹' + Math.round(revenue).toLocaleString('en-IN');
+      if (orders.length === 0) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">🛒</div><h3>No orders yet</h3></div>'; return; }
+      container.innerHTML = orders.map(o => `
+        <div class="card mb-12 flex-between" style="gap:16px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="font-size:1.8rem">${getFuelIcon(o.fuel_type)}</div>
+            <div>
+              <div class="font-bold">${o.product_name}</div>
+              <div class="text-sm text-muted">Buyer: ${o.buyer_name} • Qty: ${o.quantity} • ${formatINR(o.total_price)}</div>
+              <div class="text-xs text-muted">${new Date(o.created_at).toLocaleDateString('en-IN')}</div>
+            </div>
+          </div>
+          <div class="flex gap-8" style="align-items:center;flex-wrap:wrap">
+            <span class="status-badge status-${o.status}">${o.status}</span>
+            ${o.status !== 'cancelled' ? `<button class="btn btn-outline btn-sm" onclick="openSellerTracking(${JSON.stringify(o).replace(/"/g,'&quot;')})">🗺️ Track</button>` : ''}
+            ${o.status === 'pending' ? `<button class="btn btn-primary btn-sm" onclick="updateStatus(${o.id},'confirmed')">Confirm</button>` : ''}
+            ${o.status === 'confirmed' ? `<button class="btn btn-primary btn-sm" onclick="updateStatus(${o.id},'delivered')">Mark Delivered</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    } catch(e) { container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`; }
+  }
+  async function updateStatus(id, status) {
+    try { await api.updateOrderStatus(id, status); showToast('Order updated!', 'success'); loadSellerOrders(); }
+    catch(e) { showToast(e.message, 'error'); }
+  }
+  async function addProduct() {
+    const data = {
+      name: document.getElementById('p-name').value,
+      fuel_type: document.getElementById('p-type').value,
+      use_case: document.getElementById('p-usecase').value,
+      price: parseFloat(document.getElementById('p-price').value),
+      unit: document.getElementById('p-unit').value,
+      quantity_available: parseFloat(document.getElementById('p-qty').value),
+      city: document.getElementById('p-city').value,
+      description: document.getElementById('p-desc').value,
+    };
+    if (!data.name || !data.price || !data.quantity_available) { showToast('Please fill all required fields', 'error'); return; }
+    try {
+      await api.createProduct(data);
+      showToast('Product listed successfully! 🎉', 'success');
+      showTab('listings');
+      loadListings();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+  let demandChartInst = null;
+  async function loadDemand() {
+    try {
+      const data = await api.demandForecast();
+      const gaps = await api.supplyGap();
+      const labels = data.slice(0,8).map(d => `${d.city} (${d.fuel_type})`);
+      const current = data.slice(0,8).map(d => d.current_demand);
+      const forecast = data.slice(0,8).map(d => d.forecast_next_month);
+      const ctx = document.getElementById('demand-chart').getContext('2d');
+      if (demandChartInst) demandChartInst.destroy();
+      demandChartInst = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Current', data: current, backgroundColor: 'rgba(34,197,94,0.5)', borderColor: 'rgba(34,197,94,1)', borderWidth: 1 },
+            { label: 'Forecast', data: forecast, backgroundColor: 'rgba(163,230,53,0.4)', borderColor: 'rgba(163,230,53,1)', borderWidth: 1 }
+          ]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } },
+          scales: { x: { ticks: { color: '#64748b', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } } } }
+      });
+      const gapHtml = gaps.slice(0,8).map(g => `
+        <div class="flex-between" style="padding:10px 0;border-bottom:1px solid var(--clr-border)">
+          <span class="font-bold text-sm">${g.city}</span>
+          <div class="flex gap-8">
+            <span class="tag">D: ${g.demand}</span>
+            <span class="tag" style="${g.gap > 0 ? 'color:var(--clr-red)' : 'color:var(--clr-primary)'}">Gap: ${g.gap}</span>
+          </div>
+        </div>`).join('');
+      document.getElementById('gap-table').innerHTML = gapHtml || '<p class="text-muted text-sm">No data available</p>';
+    } catch(e) { showToast('Could not load demand data', 'error'); }
+  }
+  loadListings();
+  loadSellerOrders();
+
+  /* ── Seller Tracking Modal ── */
+  function openSellerTracking(order) {
+    const steps = [
+      { key: 'pending',   icon: '🛒', label: 'Order Received',   desc: 'New order waiting for confirmation.' },
+      { key: 'confirmed', icon: '✅', label: 'Ready for Pickup', desc: 'Order confirmed. EcoFuel agent assigning.' },
+      { key: 'on_the_way', icon: '🚴', label: 'In Transit',      desc: 'Partner is delivering to the buyer.' },
+      { key: 'delivered', icon: '📦', label: 'Handed Over',      desc: 'The shipment has reached the customer.' },
+    ];
+    const STATUS_MAP = { pending: 0, confirmed: 1, on_the_way: 2, delivered: 3 };
+    const currentStep = STATUS_MAP[order.status] ?? (order.status === 'cancelled' ? -1 : 0);
+
+    const stepsHtml = steps.map((s, i) => {
+      const done = i <= currentStep;
+      const active = i === currentStep;
+      return `
+        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:20px">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;
+              background:${done ? 'var(--grad-primary)' : '#f3f4f6'};
+              box-shadow:${active ? 'var(--shadow-green)' : 'none'};
+              border:2px solid ${done ? 'var(--clr-primary)' : 'var(--clr-border)'};
+              color:${done ? '#fff' : '#9ca3af'}">
+              ${s.icon}
+            </div>
+            ${i < steps.length-1 ? `<div style="width:2px;height:30px;background:${done && currentStep > i ? 'var(--clr-primary)' : 'var(--clr-border)'};margin:4px 0"></div>` : ''}
+          </div>
+          <div style="padding-top:4px">
+            <div style="font-weight:700;font-size:0.88rem;color:${done ? 'var(--clr-text)' : 'var(--clr-text-3)'}">${s.label}</div>
+            <div style="font-size:0.75rem;color:var(--clr-text-2);margin-top:2px">${s.desc}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const cancelled = order.status === 'cancelled';
+    document.getElementById('seller-track-body').innerHTML = `
+      <div style="margin-bottom:10px">
+        <div style="background:#f8fafc;border-radius:var(--radius);padding:16px;margin-bottom:20px;display:flex;gap:12px;align-items:center">
+          <div style="font-size:1.8rem">${getFuelIcon(order.fuel_type)}</div>
+          <div style="flex:1">
+            <div style="font-weight:800;font-size:0.95rem">${order.product_name}</div>
+            <div style="font-size:0.75rem;color:var(--clr-text-2)">ID: #${order.id} | Buyer: ${order.buyer_name}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:800;color:var(--clr-primary)">${formatINR(order.total_price)}</div>
+            <div style="font-size:0.75rem;color:var(--clr-text-3)">${order.quantity} units</div>
+          </div>
+        </div>
+        ${cancelled ? `<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:var(--radius);padding:12px 16px;color:#991b1b;font-weight:700">❌ Order was cancelled by user or seller.</div>` : stepsHtml}
+      </div>`;
+    document.getElementById('seller-track-modal').classList.add('open');
+  }
+  document.getElementById('seller-track-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('seller-track-modal')) document.getElementById('seller-track-modal').classList.remove('open');
+  });
+</script>
+</body>
+</html>

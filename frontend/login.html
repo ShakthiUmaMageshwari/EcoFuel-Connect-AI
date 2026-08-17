@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Signup — EcoFuel Connect AI</title>
+  <meta name="description" content="Join EcoFuel Connect AI as a buyer or seller of sustainable fuels.">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <script src="js/translations.js"></script>
+  <script src="js/i18n.js" defer></script>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="navbar-brand"><img src="/images/logo.png" alt="EcoFuel Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover"><span class="brand-text">EcoFuel <span>Connect</span></span></a>
+  <div class="navbar-actions">
+    <div class="lang-selector">
+      <span class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</span>
+      <span class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">HI</span>
+      <span class="lang-btn" data-lang="te" onclick="setLanguage('te')">TE</span>
+      <span class="lang-btn" data-lang="ta" onclick="setLanguage('ta')">TA</span>
+    </div>
+    <a href="index.html" class="btn btn-ghost btn-sm" data-i18n="nav_home">← Home</a>
+  </div>
+</nav>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div style="font-size:2.5rem;margin-bottom:8px">🌿</div>
+      <h1 class="font-head" style="font-size:1.6rem;font-weight:800">EcoFuel Connect <span class="gradient-text">AI</span></h1>
+      <p class="text-sm text-muted mt-4">Join India's sustainable fuel marketplace</p>
+    </div>
+    <!-- Login/Signup Toggle -->
+    <div class="tabs mb-24">
+      <button class="tab-btn active" id="tab-login" onclick="showTab('login')">Login</button>
+      <button class="tab-btn" id="tab-signup" onclick="showTab('signup')">Sign Up</button>
+    </div>
+    <!-- Login Form -->
+    <div id="login-form">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="login-email" class="form-control" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="login-password" class="form-control" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary w-full btn-lg" onclick="doLogin()">🔑 Login</button>
+      <div class="text-center mt-16 text-sm text-muted">
+        Demo: <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:6px">admin@ecofuel.in / admin123</code>
+      </div>
+      <div class="text-center mt-8 text-sm text-muted">
+        Buyer: <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:6px">amit@gmail.com / buyer123</code>
+      </div>
+      <div class="text-center mt-8 text-sm text-muted">
+        Seller: <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:6px">rajesh@biofarm.in / seller123</code>
+      </div>
+      <div class="text-center mt-8 text-sm text-muted">
+        Delivery: <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:6px">Sign up as Delivery Agent</code>
+      </div>
+    </div>
+    <!-- Signup Form -->
+    <div id="signup-form" style="display:none">
+      <div class="mb-16">
+        <label class="form-label">I am a...</label>
+        <div class="role-selector">
+          <button class="role-btn active" id="role-buyer" onclick="selectRole('buyer')">👤<br>Buyer</button>
+          <button class="role-btn" id="role-seller" onclick="selectRole('seller')">🌾<br>Seller</button>
+          <button class="role-btn" id="role-agent" onclick="selectRole('agent')">🚴<br>Delivery Agent</button>
+          <button class="role-btn" id="role-admin" onclick="selectRole('admin')">⚙️<br>Admin</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" id="signup-name" class="form-control" placeholder="Your full name">
+      </div>
+      <div id="seller-biz-field" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Business Name</label>
+          <input type="text" id="signup-biz" class="form-control" placeholder="Your business name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="signup-email" class="form-control" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input type="tel" id="signup-phone" class="form-control" placeholder="10-digit mobile number">
+      </div>
+      <div class="grid-2" style="gap:12px">
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <select id="signup-city" class="form-control">
+            <option value="">Select City</option>
+            <option>Delhi</option><option>Mumbai</option><option>Bangalore</option>
+            <option>Chennai</option><option>Pune</option><option>Hyderabad</option>
+            <option>Kolkata</option><option>Ahmedabad</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pincode</label>
+          <input type="text" id="signup-pincode" class="form-control" placeholder="110001">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="signup-password" class="form-control" placeholder="Minimum 6 characters">
+      </div>
+      <button class="btn btn-primary w-full btn-lg" onclick="doSignup()">🌱 Create Account</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container"></div>
+<script src="js/api.js"></script>
+<script>
+  let currentRole = 'buyer';
+  // Redirect if already logged in
+  const user = getUser();
+  if (user) {
+    if (user.role === 'seller') window.location.href = 'seller-dashboard.html';
+    else if (user.role === 'admin') window.location.href = 'admin.html';
+    else if (user.role === 'agent') window.location.href = 'delivery-agent.html';
+    else window.location.href = 'user-dashboard.html';
+  }
+  // Check URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('role') === 'seller') { showTab('signup'); selectRole('seller'); }
+  function showTab(tab) {
+    document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  }
+  function selectRole(role) {
+    currentRole = role;
+    ['buyer','seller','agent','admin'].forEach(r => {
+      document.getElementById(`role-${r}`)?.classList.toggle('active', r === role);
+    });
+    document.getElementById('seller-biz-field').style.display = role === 'seller' ? 'block' : 'none';
+  }
+  async function doLogin() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) { showToast('Please fill in all fields', 'error'); return; }
+    try {
+      const res = await api.login({ email, password });
+      setToken(res.token);
+      setUser(res.user);
+      showToast('Welcome back, ' + res.user.name.split(' ')[0] + '! 🎉', 'success');
+      setTimeout(() => {
+        if (res.user.role === 'seller') window.location.href = 'seller-dashboard.html';
+        else if (res.user.role === 'admin') window.location.href = 'admin.html';
+        else if (res.user.role === 'agent') window.location.href = 'delivery-agent.html';
+        else window.location.href = 'user-dashboard.html';
+      }, 1000);
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+  async function doSignup() {
+    const data = {
+      name: document.getElementById('signup-name').value,
+      email: document.getElementById('signup-email').value,
+      phone: document.getElementById('signup-phone').value,
+      city: document.getElementById('signup-city').value,
+      pincode: document.getElementById('signup-pincode').value,
+      password: document.getElementById('signup-password').value,
+      role: currentRole,
+      business_name: document.getElementById('signup-biz')?.value || ''
+    };
+    if (!data.name || !data.email || !data.password) { showToast('Please fill required fields', 'error'); return; }
+    try {
+      const res = await api.signup(data);
+      setToken(res.token);
+      setUser(res.user);
+      showToast('Account created! Welcome to EcoFuel 🌿', 'success');
+      setTimeout(() => {
+        if (res.user.role === 'seller') window.location.href = 'seller-dashboard.html';
+        else if (res.user.role === 'admin') window.location.href = 'admin.html';
+        else if (res.user.role === 'agent') window.location.href = 'delivery-agent.html';
+        else window.location.href = 'user-dashboard.html';
+      }, 1000);
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+  // Enter key support
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') { if (document.getElementById('login-form').style.display !== 'none') doLogin(); else doSignup(); } });
+</script>
+</body>
+</html>
